@@ -8,7 +8,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 @app.get("/api/feed")
 def get_feed(type: str = Query("movie"), query: str = Query(None)):
     if type == "sports":
-        return {"type": "sports", "items": fetch_live_sports()}
+        return {"type": "sports", "items": fetch_live_sports(search_query=query)}
     else:
         # type can be 'movie' or 'tv'
         return {"type": type, "items": fetch_media(media_type=type, search_query=query)}
@@ -16,9 +16,10 @@ def get_feed(type: str = Query("movie"), query: str = Query(None)):
 @app.get("/api/stream")
 def get_stream(id: str = Query(...), type: str = Query("movie"), season: int = Query(1), episode: int = Query(1), url: str = Query(None)):
     if type in ["sports", "sports_channel"]:
+        source_name = "Open Coverage" if url else "HLS Stream"
         return {
-            "id": id, "title": "Live Broadcast",
-            "sources": [{"name": "HLS Stream", "url": url or "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"}],
+            "id": id, "title": "Sports Coverage",
+            "sources": [{"name": source_name, "url": url or "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"}],
             "isLive": True
         }
     elif type == "tv":

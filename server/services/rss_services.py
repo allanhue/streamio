@@ -1,34 +1,114 @@
 import requests
+import xml.etree.ElementTree as ET
+from hashlib import sha1
 
 TMDB_API_KEY = "15d2ea6d0dc1d476efbca3eba2b9bbfb"
 ESPN_SOCCER_API = "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard"
+SPORTS_RSS_FEEDS = [
+    ("IPTV-Org Sports", "https://github.io"),
+    ("Doms9 Live Sports", "https://s.id"),
+]
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 }
 
-def fetch_live_sports():
+def _text(node, tag):
+    child = node.find(tag)
+    return child.text.strip() if child is not None and child.text else ""
+
+def _media_thumbnail(node):
+    for child in node:
+        if child.tag.endswith("thumbnail") or child.tag.endswith("content"):
+            url = child.attrib.get("url")
+            if url:
+                return url
+    enclosure = node.find("enclosure")
+    if enclosure is not None and enclosure.attrib.get("type", "").startswith("image/"):
+        return enclosure.attrib.get("url", "")
+    return ""
+
+def _fetch_sports_rss(search_query=None):
+    items = []
+    seen = set()
+
+    for source_name, feed_url in SPORTS_RSS_FEEDS:
+        try:
+            res = requests.get(feed_url, headers=HEADERS, timeout=8)
+            res.raise_for_status()
+            root = ET.fromstring(res.content)
+
+            for entry in root.findall(".//item"):
+                title = _text(entry, "title")
+                link = _text(entry, "link")
+                if not title or not link or link in seen:
+                    continue
+                if search_query and search_query.lower() not in title.lower():
+                    continue
+
+                seen.add(link)
+                thumbnail = _media_thumbnail(entry)
+                items.append({
+                    "id": sha1(link.encode("utf-8")).hexdigest()[:16],
+                    "title": title,
+                    "competition": source_name,
+                    "thumbnail": thumbnail,
+                    "poster": thumbnail,
+                    "published": _text(entry, "pubDate") or source_name,
+                    "media_type": "sports",
+                    "url": link
+                })
+
+                if len(items) == 18:
+                    return items
+        except Exception as e:
+            print(f"Error fetching sports RSS from {source_name}: {e}")
+
+    return items
+
+def fetch_live_sports(search_query=None):
+    rss_items = _fetch_sports_rss(search_query=search_query)
+    if rss_items:
+        return rss_items
+
     try:
         res = requests.get(ESPN_SOCCER_API, headers=HEADERS, timeout=8)
         data = res.json()
         matches = []
-        for event in data.get("events", [])[:10]:
+        for event in data.get("events", []):
+            title = event.get("name", "Unknown Match")
+            if search_query and search_query.lower() not in title.lower():
+                continue
+
             competitors = event.get("competitions", [{}])[0].get("competitors", [])
             thumbnail = competitors[0].get("team", {}).get("logo", "") if competitors else ""
             matches.append({
                 "id": str(event.get("id")),
-                "title": event.get("name", "Unknown Match"),
+                "title": title,
                 "competition": "Football",
                 "thumbnail": thumbnail,
+                "poster": thumbnail,
                 "published": event.get("status", {}).get("type", {}).get("description", "Live"),
                 "media_type": "sports"
             })
+            if len(matches) == 12:
+                break
+
         if not matches:
             raise ValueError()
         return matches
     except:
         return [
-            {"id": "redbull", "title": "Red Bull TV", "competition": "Extreme Sports", "thumbnail": "", "published": "24/7 LIVE", "media_type": "sports_channel", "url": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"}
+            {
+                "id": "redbull",
+                "title": "Red Bull TV",
+                "competition": "Extreme Sports",
+                "thumbnail": "",
+                "poster": "",
+                "published": "24/7 LIVE",
+                "media_type": "sports_channel",
+                "url": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"
+            }
         ]
 
 def fetch_media(media_type="movie", search_query=None):
