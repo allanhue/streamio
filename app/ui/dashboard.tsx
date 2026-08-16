@@ -191,7 +191,6 @@ export default function DashboardUI() {
               </span>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-neutral-500">Stream workspace</p>
-                <h1 className="text-xl font-black tracking-tight text-white sm:text-2xl">Watch smarter</h1>
               </div>
             </div>
 
