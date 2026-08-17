@@ -22,6 +22,9 @@ type StreamData = {
   isLive?: boolean;
 };
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+const buildApiUrl = (path: string) => `${API_BASE.replace(/\/$/, '')}${path}`;
+
 const tabs: { id: MediaKind; label: string; helper: string; icon: IconName }[] = [
   { id: 'movie', label: 'Movies', helper: 'Trending films', icon: 'film' },
   { id: 'tv', label: 'Series', helper: 'Episodes and seasons', icon: 'tv' },
@@ -110,7 +113,7 @@ export default function DashboardUI() {
   useEffect(() => {
     const delay = window.setTimeout(() => {
       setLoading(true);
-      const url = `http://127.0.0.1:8000/api/feed?type=${activeTab}&query=${encodeURIComponent(searchQuery)}`;
+      const url = buildApiUrl(`/api/feed?type=${activeTab}&query=${encodeURIComponent(searchQuery)}`);
 
       fetch(url)
         .then((res) => res.json())
@@ -145,7 +148,7 @@ export default function DashboardUI() {
 
       const urlParam = item.url ? `&url=${encodeURIComponent(item.url)}` : '';
       const type = item.media_type || activeTab;
-      const res = await fetch(`http://127.0.0.1:8000/api/stream?id=${item.id}&type=${type}&season=${nextSeason}&episode=${nextEpisode}${urlParam}`);
+      const res = await fetch(buildApiUrl(`/api/stream?id=${item.id}&type=${type}&season=${nextSeason}&episode=${nextEpisode}${urlParam}`));
       const data = await res.json();
       setSelectedStream(data);
       setPlayerLocked(true);
@@ -254,7 +257,7 @@ export default function DashboardUI() {
     }
 
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/media-details?id=${item.id}&type=tv`);
+      const res = await fetch(buildApiUrl(`/api/media-details?id=${item.id}&type=tv`));
       const data = await res.json();
       const seasons = Array.isArray(data.seasons) && data.seasons.length > 0 ? data.seasons : defaultSeriesMeta.seasons;
       setSeriesMeta({

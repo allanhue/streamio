@@ -1,6 +1,6 @@
 import { StreamData, RSSFeedResponse } from './types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 // Now supports 'movie', 'tv', and 'sports'
 export async function fetchStreamSource(id: string, type: string = 'movie'): Promise<StreamData> {
