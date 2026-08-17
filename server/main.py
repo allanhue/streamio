@@ -1,6 +1,10 @@
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
-from services.rss_services import fetch_live_sports, fetch_media
+
+try:
+    from .services.rss_services import fetch_live_sports, fetch_media, fetch_media_details
+except ImportError:
+    from services.rss_services import fetch_live_sports, fetch_media, fetch_media_details
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -12,6 +16,10 @@ def get_feed(type: str = Query("movie"), query: str = Query(None)):
     else:
         # type can be 'movie' or 'tv'
         return {"type": type, "items": fetch_media(media_type=type, search_query=query)}
+
+@app.get("/api/media-details")
+def get_media_details(id: str = Query(...), type: str = Query("movie")):
+    return fetch_media_details(media_type=type, media_id=id)
 
 @app.get("/api/stream")
 def get_stream(id: str = Query(...), type: str = Query("movie"), season: int = Query(1), episode: int = Query(1), url: str = Query(None)):

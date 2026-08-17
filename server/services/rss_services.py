@@ -111,6 +111,54 @@ def fetch_live_sports(search_query=None):
             }
         ]
 
+def fetch_media_details(media_type="movie", media_id=None):
+    """Fetches detailed metadata for a movie or TV series from TMDB."""
+    if not media_id:
+        return {}
+
+    try:
+        url = f"https://api.themoviedb.org/3/{media_type}/{media_id}?api_key={TMDB_API_KEY}"
+        res = requests.get(url, headers=HEADERS, timeout=8)
+        data = res.json()
+
+        if media_type == "tv":
+            seasons = []
+            for season in data.get("seasons", []) or []:
+                if season.get("season_number") is None:
+                    continue
+                seasons.append({
+                    "season_number": int(season.get("season_number", 1)),
+                    "episode_count": int(season.get("episode_count", 0) or 0),
+                })
+
+            seasons.sort(key=lambda item: item["season_number"])
+            total_episodes = sum(item["episode_count"] for item in seasons) or int(data.get("number_of_episodes", 0) or 0)
+            total_seasons = max(len(seasons), int(data.get("number_of_seasons", 0) or 0) or 1)
+
+            return {
+                "id": str(data.get("id")),
+                "title": data.get("name") or data.get("title") or "Unknown",
+                "number_of_seasons": total_seasons,
+                "number_of_episodes": max(1, total_episodes),
+                "seasons": seasons or [{"season_number": 1, "episode_count": 1}],
+                "overview": data.get("overview"),
+                "poster": f"https://image.tmdb.org/t/p/w500{data.get('poster_path')}" if data.get('poster_path') else "",
+                "published": data.get("first_air_date") or "N/A",
+            }
+
+        return {
+            "id": str(data.get("id")),
+            "title": data.get("title") or data.get("name") or "Unknown",
+            "runtime": data.get("runtime"),
+            "overview": data.get("overview"),
+            "poster": f"https://image.tmdb.org/t/p/w500{data.get('poster_path')}" if data.get('poster_path') else "",
+            "published": data.get("release_date") or "N/A",
+        }
+    except Exception as e:
+        print(f"Error fetching details for {media_type}/{media_id}: {e}")
+        return {}
+
+
 def fetch_media(media_type="movie", search_query=None):
     """Fetches Movies or TV Series (like Money Heist) from TMDB."""
     try:
@@ -118,20 +166,26 @@ def fetch_media(media_type="movie", search_query=None):
             url = f"https://api.themoviedb.org/3/search/{media_type}?api_key={TMDB_API_KEY}&query={search_query}&page=1"
         else:
             url = f"https://api.themoviedb.org/3/trending/{media_type}/day?api_key={TMDB_API_KEY}"
-            
+
         res = requests.get(url, headers=HEADERS, timeout=8)
         data = res.json()
         results = []
         for item in data.get("results", [])[:18]:
-            if not item.get('poster_path'): continue
+            if not item.get('poster_path'):
+                continue
+
             title = item.get("title") if media_type == "movie" else item.get("name")
+            details = fetch_media_details(media_type, item.get("id")) if media_type == "tv" else {}
             results.append({
                 "id": str(item.get("id")),
                 "title": title,
                 "rating": round(item.get("vote_average", 0), 1),
                 "poster": f"https://image.tmdb.org/t/p/w500{item.get('poster_path')}",
                 "published": item.get("release_date") or item.get("first_air_date") or "N/A",
-                "media_type": media_type
+                "media_type": media_type,
+                "number_of_seasons": details.get("number_of_seasons"),
+                "number_of_episodes": details.get("number_of_episodes"),
+                "seasons": details.get("seasons", [{"season_number": 1, "episode_count": 1}]),
             })
         return results
     except Exception as e:
