@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Player from '../components/player';
 import Watchlist, { WatchlistItem, WatchlistMediaKind } from './watchlist';
 
 type MediaKind = 'movie' | 'tv' | 'sports';
@@ -42,6 +43,15 @@ const defaultSeriesMeta = {
   number_of_episodes: 1,
   seasons: [{ season_number: 1, episode_count: 1 }],
 };
+
+const supportedPlatforms = [
+  { name: 'Netflix', mark: 'N', image: 'https://cdn.simpleicons.org/netflix/E50914' },
+  { name: 'Hulu', mark: 'H', image: 'https://cdn.simpleicons.org/hulu/1CE783' },
+  { name: 'HBO Max', mark: 'HBO', image: 'https://cdn.simpleicons.org/hbo/FFFFFF' },
+  { name: 'Disney+', mark: 'D+', image: 'https://cdn.simpleicons.org/disneyplus/113CCF' },
+  { name: 'Prime Video', mark: 'P', image: 'https://cdn.simpleicons.org/amazonprime/00A8E1' },
+  { name: 'Apple TV+', mark: 'TV', image: 'https://cdn.simpleicons.org/appletv/FFFFFF' },
+];
 
 type IconName = 'search' | 'bookmark' | 'check' | 'play' | 'tv' | 'film' | 'radio' | 'spark' | 'grid';
 
@@ -201,6 +211,7 @@ export default function DashboardUI() {
 
   const activeSources = selectedStream?.sources || [];
   const currentSource = activeSources[activeMirror]?.url;
+  const isDirectHls = Boolean(currentSource?.split('?')[0].toLowerCase().endsWith('.m3u8'));
   const activeTabMeta = tabs.find((tab) => tab.id === activeTab) || tabs[0];
 
   useEffect(() => {
@@ -276,16 +287,13 @@ export default function DashboardUI() {
   return (
     <div className="min-h-screen bg-[#050505] text-white">
       <section className="px-4 py-4 sm:px-6 lg:px-8">
-        <div className="rounded-2xl border border-white/10 bg-neutral-950 p-3 shadow-xl shadow-black sm:p-4">
+        <div className="rounded-2xl border border-white/10 bg-neutral-950/90 p-4 shadow-xl shadow-black sm:p-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-3">
-          
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-neutral-500">Stream workspace</p>
-              </div>
+            <div className="min-w-0">
+              <h1 className="mt-1 text-2xl font-black tracking-tight sm:text-3xl">Find your next watch.</h1>
             </div>
 
-            <div className="grid gap-2 sm:grid-cols-3 lg:w-[500px]">
+            <div className="grid gap-2 sm:grid-cols-3 lg:w-[520px]">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -305,6 +313,25 @@ export default function DashboardUI() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1500px] px-4 pb-5 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">Supported platforms</p>
+          </div>
+        </div>
+        <div className="mt-3 flex gap-3 overflow-x-auto pb-1">
+          {supportedPlatforms.map((platform) => (
+            <div key={platform.name} className="flex min-w-[132px] items-center gap-3 rounded-xl border border-white/10 bg-white/[0.045] px-3 py-3 transition hover:border-white/30 hover:bg-white/[0.08]">
+              <span className="relative grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-black/60 text-[10px] font-black text-white">
+                <span>{platform.mark}</span>
+                <img src={platform.image} alt="" className="absolute inset-1 h-6 w-6 object-contain" onError={(event) => { event.currentTarget.style.display = 'none'; }} />
+              </span>
+              <span className="whitespace-nowrap text-xs font-black text-neutral-200">{platform.name}</span>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -328,7 +355,9 @@ export default function DashboardUI() {
               </div>
 
               <div className="relative aspect-video w-full overflow-hidden bg-black">
-                {selectedStream.isLive && activeSources[0] ? (
+                {isDirectHls && currentSource ? (
+                  <Player src={currentSource} />
+                ) : selectedStream.isLive && activeSources[0] ? (
                   <div className="flex h-full flex-col items-center justify-center gap-4">
                     <span className="grid h-14 w-14 place-items-center rounded-full bg-white text-black">
                       <Icon name="radio" className="h-6 w-6" />
@@ -531,7 +560,7 @@ export default function DashboardUI() {
       )}
 
       <div className="grid gap-5 px-4 pb-8 sm:px-6 lg:grid-cols-[340px_minmax(0,1fr)] lg:px-8">
-        <aside className="space-y-5">
+        <aside id="my-list" className="space-y-5">
           <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-2xl shadow-black/30">
             <label htmlFor="stream-search" className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-neutral-500">
               <Icon name="search" />
@@ -567,7 +596,7 @@ export default function DashboardUI() {
           />
         </aside>
 
-        <section className="rounded-[28px] border border-white/10 bg-white/[0.03] p-4 shadow-2xl shadow-black/30 sm:p-5">
+        <section id="catalog" className="rounded-[28px] border border-white/10 bg-white/[0.03] p-4 shadow-2xl shadow-black/30 sm:p-5">
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-neutral-500">
