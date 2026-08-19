@@ -1,12 +1,35 @@
+import asyncio
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
+
+try:
+    from .db import DATABASE_URL, init_db, keep_database_awake
+except ImportError:
+    from db import DATABASE_URL, init_db, keep_database_awake
 
 try:
     from .services.rss_services import fetch_live_sports, fetch_media, fetch_media_details
 except ImportError:
     from services.rss_services import fetch_live_sports, fetch_media, fetch_media_details
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    keepalive_task = None
+    if DATABASE_URL:
+        await asyncio.to_thread(init_db)
+        keepalive_task = asyncio.create_task(keep_database_awake())
+
+    try:
+        yield
+    finally:
+        if keepalive_task:
+            keepalive_task.cancel()
+            await asyncio.gather(keepalive_task, return_exceptions=True)
+
+
+app = FastAPI(lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 @app.get("/api/feed")
