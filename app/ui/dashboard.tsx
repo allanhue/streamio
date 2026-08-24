@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Player from '../components/player';
+import TvKeyboard from '../components/tv_keyboard';
 import Watchlist, { WatchlistItem, WatchlistMediaKind } from './watchlist';
 
 type MediaKind = 'movie' | 'tv' | 'sports';
@@ -53,7 +54,7 @@ const supportedPlatforms = [
   { name: 'Apple TV+', mark: 'TV', image: 'https://cdn.simpleicons.org/appletv/FFFFFF' },
 ];
 
-type IconName = 'search' | 'bookmark' | 'check' | 'play' | 'tv' | 'film' | 'radio' | 'spark' | 'grid';
+type IconName = 'search' | 'bookmark' | 'check' | 'play' | 'tv' | 'film' | 'radio' | 'spark' | 'grid' | 'keyboard';
 
 function Icon({ name, className = 'h-4 w-4' }: { name: IconName; className?: string }) {
   if (name === 'play') {
@@ -73,6 +74,7 @@ function Icon({ name, className = 'h-4 w-4' }: { name: IconName; className?: str
     radio: 'M5 11a7 7 0 0 1 14 0v5a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-5Zm4 2h6M9 16h2',
     spark: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z',
     grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+    keyboard: 'M3 6h18v12H3V6Zm3 3h.01M9 9h.01M12 9h.01M15 9h.01M18 9h.01M6 12h.01M9 12h.01M12 12h.01M15 12h.01M18 12h.01M8 15h8',
   };
 
   return (
@@ -104,6 +106,7 @@ export default function DashboardUI() {
   const [playerLocked, setPlayerLocked] = useState(true);
   const [inlinePlayer, setInlinePlayer] = useState(false);
   const [seriesMeta, setSeriesMeta] = useState(defaultSeriesMeta);
+  const [showKeyboard, setShowKeyboard] = useState(false);
 
   useEffect(() => {
     const stored = window.localStorage.getItem('streamio-watchlist');
@@ -562,18 +565,45 @@ export default function DashboardUI() {
       <div className="mx-auto max-w-[1500px] grid gap-5 px-4 pb-8 sm:px-6 lg:grid-cols-[340px_minmax(0,1fr)] lg:px-8">
         <aside id="my-list" className="space-y-5">
           <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-2xl shadow-black/30">
-            <label htmlFor="stream-search" className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-neutral-500">
-              <Icon name="search" />
-              Search
-            </label>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <label htmlFor="stream-search" className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-neutral-500">
+                <Icon name="search" />
+                Search
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowKeyboard((current) => !current)}
+                aria-pressed={showKeyboard}
+                aria-label="Toggle on-screen keyboard"
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] transition ${
+                  showKeyboard ? 'bg-white text-black' : 'bg-black text-neutral-400 hover:text-white'
+                }`}
+              >
+                <Icon name="keyboard" className="h-3.5 w-3.5" />
+                Keyboard
+              </button>
+            </div>
+
             <input
               id="stream-search"
               type="search"
               placeholder={`Search ${activeTabMeta.label.toLowerCase()}`}
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
+              onFocus={() => setShowKeyboard(true)}
               className="h-12 w-full rounded-xl border border-white/10 bg-black px-4 text-base font-semibold text-white outline-none transition placeholder:text-neutral-600 focus:border-white/50"
             />
+
+            {showKeyboard && (
+              <div className="mt-3">
+                <TvKeyboard
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  onSubmit={() => setShowKeyboard(false)}
+                  onClose={() => setShowKeyboard(false)}
+                />
+              </div>
+            )}
 
             <div className="mt-4 flex flex-wrap gap-2">
               {suggestedSearches[activeTab].map((suggestion) => (
