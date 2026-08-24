@@ -71,3 +71,23 @@ video {
     width: 100%;
   }
 }
+
+/* TV overscan safe area — most TVs crop the outer edge of the picture */
+.tv-safe-area {
+  padding-inline: clamp(1rem, 2vw, 3rem);
+}
+
+/* Visible focus ring for remote/D-pad navigation (TVs have no mouse/hover).
+   Inset (negative) offset so the ring isn't clipped by parent
+   overflow-hidden containers, e.g. rounded card thumbnails. */
+:focus-visible {
+  outline: 3px solid white;
+  outline-offset: -3px;
+}
+
+/* Large low-DPI TV screens (1080p/4K at 10ft viewing distance) */
+@media (min-width: 1920px) {
+  html {
+    font-size: 20px; /* bump base size so text isn't tiny at couch distance */
+  }
+}

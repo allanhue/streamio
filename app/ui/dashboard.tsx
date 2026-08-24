@@ -286,7 +286,7 @@ export default function DashboardUI() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white">
-      <section className="px-4 py-4 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-[1500px] px-4 py-4 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-white/10 bg-neutral-950/90 p-4 shadow-xl shadow-black sm:p-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
@@ -559,7 +559,7 @@ export default function DashboardUI() {
         </section>
       )}
 
-      <div className="grid gap-5 px-4 pb-8 sm:px-6 lg:grid-cols-[340px_minmax(0,1fr)] lg:px-8">
+      <div className="mx-auto max-w-[1500px] grid gap-5 px-4 pb-8 sm:px-6 lg:grid-cols-[340px_minmax(0,1fr)] lg:px-8">
         <aside id="my-list" className="space-y-5">
           <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-2xl shadow-black/30">
             <label htmlFor="stream-search" className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-neutral-500">
