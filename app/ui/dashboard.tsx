@@ -657,8 +657,8 @@ export default function DashboardUI() {
                 const image = item.poster || item.thumbnail;
 
                 return (
-                  <article key={`${item.media_type || activeTab}-${item.id}`} className="group overflow-hidden rounded-2xl border border-white/10 bg-black transition hover:-translate-y-1 hover:border-white/30">
-                    <button onClick={() => loadStream(item, 1, 1)} className="block w-full text-left">
+                  <article key={`${item.media_type || activeTab}-${item.id}`} className="group cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-black transition hover:-translate-y-1 hover:border-white/30">
+                    <button onClick={() => loadStream(item, 1, 1)} className="block w-full cursor-pointer text-left">
                       <div className="relative aspect-[2/3] overflow-hidden bg-neutral-900">
                         {image ? (
                           <img src={image} alt={item.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
@@ -680,7 +680,7 @@ export default function DashboardUI() {
                     </button>
                     <button
                       onClick={() => toggleWatchlist(item)}
-                      className={`flex h-10 w-full items-center justify-center gap-2 border-t border-white/10 text-xs font-black uppercase tracking-[0.12em] transition ${
+                      className={`flex h-10 w-full cursor-pointer items-center justify-center gap-2 border-t border-white/10 text-xs font-black uppercase tracking-[0.12em] transition ${
                         saved ? 'bg-white text-black' : 'bg-white/[0.04] text-neutral-300 hover:bg-white hover:text-black'
                       }`}
                     >
