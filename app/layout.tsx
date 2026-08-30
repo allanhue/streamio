@@ -7,6 +7,13 @@ export const metadata: Metadata = {
   title: 'Streamio',
   description: 'Custom video player and feed hub',
   referrer: 'no-referrer',
+  manifest: '/manifest.webmanifest',
+  applicationName: 'Streamio',
+  appleWebApp: {
+    capable: true,
+    title: 'Streamio',
+    statusBarStyle: 'black-translucent',
+  },
 };
 
 export const viewport: Viewport = {
@@ -21,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className="min-h-screen bg-black text-white antialiased tv-safe-area"
         suppressHydrationWarning
+        style={{ WebkitTapHighlightColor: 'transparent' }}
       >
         <Navbar />
         <main className="pt-16">{children}</main>
