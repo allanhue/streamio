@@ -56,9 +56,9 @@ export default function Navbar() {
           <Link href="/#stream-search" title="Search catalog" className="grid h-10 w-10 place-items-center rounded-full text-neutral-300 transition hover:bg-white/10 hover:text-white">
             <Icon name="search" />
           </Link>
-          <Link href="/watch?id=27205" className="flex items-center gap-2 rounded-md bg-white px-4 py-2 text-black transition hover:bg-neutral-200">
+          <Link href="/" className="flex items-center gap-2 rounded-md bg-white px-4 py-2 text-black transition hover:bg-neutral-200">
             <Icon name="play" />
-            <span className="hidden sm:inline">Player</span>
+            <span className="hidden sm:inline">Open app</span>
           </Link>
         </nav>
       </div>
