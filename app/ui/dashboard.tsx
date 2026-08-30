@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Player from '../components/player';
-import TvKeyboard from '../components/tv_keyboard';
+import LatestSection from './latest';
+import SearchPanel from './search-panel';
 import Watchlist, { WatchlistItem, WatchlistMediaKind } from './watchlist';
 
 type MediaKind = 'movie' | 'tv' | 'sports';
@@ -54,7 +55,7 @@ const supportedPlatforms = [
   { name: 'Apple TV+', mark: 'TV', image: 'https://cdn.simpleicons.org/appletv/FFFFFF' },
 ];
 
-type IconName = 'search' | 'bookmark' | 'check' | 'play' | 'tv' | 'film' | 'radio' | 'spark' | 'grid' | 'keyboard';
+export type IconName = 'search' | 'bookmark' | 'check' | 'play' | 'tv' | 'film' | 'radio' | 'spark' | 'grid' | 'keyboard';
 
 function Icon({ name, className = 'h-4 w-4' }: { name: IconName; className?: string }) {
   if (name === 'play') {
@@ -562,61 +563,28 @@ export default function DashboardUI() {
         </section>
       )}
 
+      <div className="mx-auto max-w-[1500px] px-4 pb-6 sm:px-6 lg:px-8">
+        <LatestSection
+          title={searchQuery ? `Fresh picks for “${searchQuery}”` : `Latest ${activeTabMeta.label.toLowerCase()}`}
+          subtitle={loading ? 'Loading...' : `${items.length} titles`}
+          items={items}
+          onSelect={(item) => loadStream(item, 1, 1)}
+          onSave={(item) => toggleWatchlist(item)}
+          savedIds={new Set(watchlist.map((entry) => entry.id))}
+        />
+      </div>
+
       <div className="mx-auto max-w-[1500px] grid gap-5 px-4 pb-8 sm:px-6 lg:grid-cols-[340px_minmax(0,1fr)] lg:px-8">
         <aside id="my-list" className="space-y-5">
-          <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-2xl shadow-black/30">
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <label htmlFor="stream-search" className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-neutral-500">
-                <Icon name="search" />
-                Search
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowKeyboard((current) => !current)}
-                aria-pressed={showKeyboard}
-                aria-label="Toggle on-screen keyboard"
-                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] transition ${
-                  showKeyboard ? 'bg-white text-black' : 'bg-black text-neutral-400 hover:text-white'
-                }`}
-              >
-                <Icon name="keyboard" className="h-3.5 w-3.5" />
-                Keyboard
-              </button>
-            </div>
-
-            <input
-              id="stream-search"
-              type="search"
-              placeholder={`Search ${activeTabMeta.label.toLowerCase()}`}
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              onFocus={() => setShowKeyboard(true)}
-              className="h-12 w-full rounded-xl border border-white/10 bg-black px-4 text-base font-semibold text-white outline-none transition placeholder:text-neutral-600 focus:border-white/50"
-            />
-
-            {showKeyboard && (
-              <div className="mt-3">
-                <TvKeyboard
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  onSubmit={() => setShowKeyboard(false)}
-                  onClose={() => setShowKeyboard(false)}
-                />
-              </div>
-            )}
-
-            <div className="mt-4 flex flex-wrap gap-2">
-              {suggestedSearches[activeTab].map((suggestion) => (
-                <button
-                  key={suggestion}
-                  onClick={() => setSearchQuery(suggestion)}
-                  className="rounded-full border border-white/10 bg-black px-3 py-2 text-xs font-bold text-neutral-300 transition hover:border-white/40 hover:text-white"
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
-          </section>
+          <SearchPanel
+            activeTabLabel={activeTabMeta.label}
+            query={searchQuery}
+            showKeyboard={showKeyboard}
+            suggestions={suggestedSearches[activeTab]}
+            onQueryChange={setSearchQuery}
+            onToggleKeyboard={() => setShowKeyboard((current) => !current)}
+            onSelectSuggestion={(suggestion) => setSearchQuery(suggestion)}
+          />
 
           <Watchlist
             items={watchlist}

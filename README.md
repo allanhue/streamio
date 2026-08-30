@@ -1,7 +1,7 @@
-Stremio streaming application services
-## Getting Started
+Streamio is astreaming app that combines a frontend catalog, a backend API and live media source handling. 
+The app is designed to work as a browser-based streaming hub .
+Getting Started
 
-First, run the development server:
 
 ```bash
 npm run dev
