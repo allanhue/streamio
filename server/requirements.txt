@@ -4,4 +4,4 @@ gunicorn==23.0.0
 requests
 a2wsgi
 psycopg2-binary
-
+python-dotenv
