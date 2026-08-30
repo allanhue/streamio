@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Streaming App',
     start_url: '/',
     scope: '/',
-    display: 'standalone',
+    display: 'browser',
     background_color: '#050505',
     theme_color: '#050505',
     orientation: 'landscape',

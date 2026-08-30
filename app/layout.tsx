@@ -7,13 +7,8 @@ export const metadata: Metadata = {
   title: 'Streamio',
   description: 'Custom video player and feed hub',
   referrer: 'no-referrer',
-  manifest: '/manifest.webmanifest',
   applicationName: 'Streamio',
-  appleWebApp: {
-    capable: true,
-    title: 'Streamio',
-    statusBarStyle: 'black-translucent',
-  },
+  colorScheme: 'dark',
 };
 
 export const viewport: Viewport = {
