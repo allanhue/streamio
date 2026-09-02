@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Player from '../components/player';
+import Catalog from './catalog';
 import LatestSection from './latest';
 import SearchPanel from './search-panel';
 import Watchlist, { WatchlistItem, WatchlistMediaKind } from './watchlist';
@@ -26,10 +27,12 @@ type StreamData = {
   isLive?: boolean;
 };
 
+type MediaIconName = 'film' | 'tv' | 'radio';
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 const buildApiUrl = (path: string) => `${API_BASE.replace(/\/$/, '')}${path}`;
 
-const tabs: { id: MediaKind; label: string; helper: string; icon: IconName }[] = [
+const tabs: { id: MediaKind; label: string; helper: string; icon: MediaIconName }[] = [
   { id: 'movie', label: 'Movies', helper: 'Trending films', icon: 'film' },
   { id: 'tv', label: 'Series', helper: 'Episodes and seasons', icon: 'tv' },
   { id: 'sports', label: 'Sports', helper: 'Live channels', icon: 'radio' },
@@ -604,73 +607,16 @@ export default function DashboardUI() {
           />
         </aside>
 
-        <section id="catalog" className="rounded-[28px] border border-white/10 bg-white/[0.03] p-4 shadow-2xl shadow-black/30 sm:p-5">
-          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-neutral-500">
-                <Icon name="grid" />
-                Catalog
-              </div>
-              <h2 className="text-2xl font-black tracking-tight">
-                {searchQuery ? `Results for "${searchQuery}"` : activeTabMeta.label}
-              </h2>
-            </div>
-            <p className="text-sm font-bold text-neutral-500">{loading ? 'Searching...' : `${items.length} titles`}</p>
-          </div>
-
-          {loading ? (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-              {Array.from({ length: 10 }, (_, index) => (
-                <div key={index} className="h-72 animate-pulse rounded-2xl bg-white/5" />
-              ))}
-            </div>
-          ) : items.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-white/10 bg-black/30 p-10 text-center text-neutral-500">
-              No items found for this catalog.
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-              {items.map((item) => {
-                const saved = watchlist.some((savedItem) => savedItem.id === item.id);
-                const image = item.poster || item.thumbnail;
-
-                return (
-                  <article key={`${item.media_type || activeTab}-${item.id}`} className="group cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-black transition hover:-translate-y-1 hover:border-white/30">
-                    <button onClick={() => loadStream(item, 1, 1)} className="block w-full cursor-pointer text-left">
-                      <div className="relative aspect-[2/3] overflow-hidden bg-neutral-900">
-                        {image ? (
-                          <img src={image} alt={item.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
-                        ) : (
-                          <div className="flex h-full items-center justify-center text-neutral-600">
-                            <Icon name={activeTabMeta.icon} className="h-8 w-8" />
-                          </div>
-                        )}
-                        {item.rating ? (
-                          <span className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-1 text-xs font-black text-white backdrop-blur">
-                            {item.rating}
-                          </span>
-                        ) : null}
-                      </div>
-                      <div className="min-h-[88px] p-3">
-                        <h3 className="line-clamp-2 text-sm font-black leading-tight">{item.title}</h3>
-                        <p className="mt-2 truncate text-xs font-semibold text-neutral-500">{item.published || item.competition || 'Ready to stream'}</p>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => toggleWatchlist(item)}
-                      className={`flex h-10 w-full cursor-pointer items-center justify-center gap-2 border-t border-white/10 text-xs font-black uppercase tracking-[0.12em] transition ${
-                        saved ? 'bg-white text-black' : 'bg-white/[0.04] text-neutral-300 hover:bg-white hover:text-black'
-                      }`}
-                    >
-                      <Icon name={saved ? 'check' : 'bookmark'} />
-                      {saved ? 'Saved' : 'Save'}
-                    </button>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </section>
+        <Catalog
+          items={items}
+          activeTabLabel={activeTabMeta.label}
+          activeIcon={activeTabMeta.icon}
+          query={searchQuery}
+          loading={loading}
+          savedIds={new Set(watchlist.map((entry) => entry.id))}
+          onSelect={(item) => loadStream(item, 1, 1)}
+          onSave={(item) => toggleWatchlist(item)}
+        />
       </div>
     </div>
   );
