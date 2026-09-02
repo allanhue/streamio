@@ -1,12 +1,14 @@
 import './globals.css';
 import React from 'react';
 import Navbar from './components/navbar';
+import PwaRegister from './components/pwa-register';
 import { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
   title: 'Streamio',
   description: 'Custom video player and feed hub',
   referrer: 'no-referrer',
+  manifest: '/manifest.webmanifest',
   applicationName: 'Streamio',
   colorScheme: 'dark',
 };
@@ -25,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         suppressHydrationWarning
         style={{ WebkitTapHighlightColor: 'transparent' }}
       >
+        <PwaRegister />
         <Navbar />
         <main className="pt-16">{children}</main>
       </body>
