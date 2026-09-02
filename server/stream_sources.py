@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 # Direct HLS sources kept on the backend so the TV app plays from the server-side stream layer
-# instead of relying only on third-party embedded players.
 DEFAULT_STREAMS: Dict[str, List[Dict[str, str]]] = {
     "sports": [
         {"name": "Live Sports HD", "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"},
@@ -19,6 +18,10 @@ DEFAULT_STREAMS: Dict[str, List[Dict[str, str]]] = {
         {"name": "Movie Stream", "url": "https://d3rlna7iyuk8km.cloudfront.net/ATVafrica/atvamericas/s.m3u8"},
     ],
 }
+
+
+
+
 
 
 def _normalize_url(url: Optional[str]) -> Optional[str]:

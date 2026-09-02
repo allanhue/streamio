@@ -46,6 +46,15 @@ export default function Navbar() {
             <Icon name="grid" />
             <span className="ml-2 inline">Browse</span>
           </Link>
+          <Link href="/?type=movie#catalog" className="rounded-md px-3 py-2 text-neutral-400 transition hover:bg-white/10 hover:text-white">
+            Movies
+          </Link>
+          <Link href="/?type=tv#catalog" className="rounded-md px-3 py-2 text-neutral-400 transition hover:bg-white/10 hover:text-white">
+            TV
+          </Link>
+          <Link href="/?type=sports#catalog" className="rounded-md px-3 py-2 text-neutral-400 transition hover:bg-white/10 hover:text-white">
+            Sports
+          </Link>
           <Link href="/#my-list" className="flex items-center rounded-md px-3 py-2 text-neutral-400 transition hover:bg-white/10 hover:text-white">
             <Icon name="bookmark" />
             <span className="ml-2">My List</span>

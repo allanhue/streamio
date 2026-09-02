@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Player from '../components/player';
 import LatestSection from './latest';
 import SearchPanel from './search-panel';
@@ -94,6 +95,7 @@ function normalizeItem(item: MediaItem, fallbackType: MediaKind): MediaItem {
 }
 
 export default function DashboardUI() {
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<MediaKind>('movie');
   const [searchQuery, setSearchQuery] = useState('');
   const [items, setItems] = useState<MediaItem[]>([]);
@@ -108,6 +110,14 @@ export default function DashboardUI() {
   const [inlinePlayer, setInlinePlayer] = useState(false);
   const [seriesMeta, setSeriesMeta] = useState(defaultSeriesMeta);
   const [showKeyboard, setShowKeyboard] = useState(false);
+
+  useEffect(() => {
+    const requestedType = searchParams.get('type');
+    if (requestedType === 'movie' || requestedType === 'tv' || requestedType === 'sports') {
+      setActiveTab(requestedType);
+      setSearchQuery('');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const stored = window.localStorage.getItem('streamio-watchlist');
