@@ -9,14 +9,6 @@ DEFAULT_STREAMS: Dict[str, List[Dict[str, str]]] = {
         {"name": "Red Bull TV", "url": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"},
         {"name": "Open Coverage", "url": "https://d3rlna7iyuk8km.cloudfront.net/ATVafrica/atvamericas/s.m3u8"},
     ],
-    "tv": [
-        {"name": "Backend TV HD", "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"},
-        {"name": "Arena World", "url": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"},
-    ],
-    "movie": [
-        {"name": "Cinema HD", "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"},
-        {"name": "Movie Stream", "url": "https://d3rlna7iyuk8km.cloudfront.net/ATVafrica/atvamericas/s.m3u8"},
-    ],
 }
 
 
@@ -51,7 +43,6 @@ def resolve_stream_sources(
             "isSeries": media_type == "tv",
         }
 
-    stream_pool = DEFAULT_STREAMS.get(media_type, DEFAULT_STREAMS["movie"])[:]
     if media_type in {"sports", "sports_channel"}:
         return {
             "id": media_id or "sports-live",
@@ -64,16 +55,24 @@ def resolve_stream_sources(
     if media_type == "tv":
         return {
             "id": media_id or f"tv-{season}-{episode}",
-            "title": f"Series playback (S{season} E{episode})",
-            "sources": stream_pool,
+            "title": f"Series (S{season} E{episode})",
+            "sources": [
+                {"name": "VidSrc.me", "url": f"https://vidsrc.me/embed/tv?tmdb={media_id}&season={season}&episode={episode}"},
+                {"name": "AutoEmbed", "url": f"https://player.autoembed.cc/embed/tv/{media_id}/{season}/{episode}"},
+                {"name": "SuperEmbed", "url": f"https://multiembed.mov/?video_id={media_id}&tmdb=1&s={season}&e={episode}"},
+            ],
             "isLive": False,
             "isSeries": True,
         }
 
     return {
         "id": media_id or "movie-stream",
-        "title": "Movie playback",
-        "sources": stream_pool,
+        "title": "Movie Stream",
+        "sources": [
+            {"name": "VidSrc.me", "url": f"https://vidsrc.me/embed/movie?tmdb={media_id}"},
+            {"name": "AutoEmbed", "url": f"https://player.autoembed.cc/embed/movie/{media_id}"},
+            {"name": "SuperEmbed", "url": f"https://multiembed.mov/?video_id={media_id}&tmdb=1"},
+        ],
         "isLive": False,
         "isSeries": False,
     }
