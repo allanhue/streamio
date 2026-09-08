@@ -113,6 +113,7 @@ export default function DashboardUI() {
   const [inlinePlayer, setInlinePlayer] = useState(false);
   const [seriesMeta, setSeriesMeta] = useState(defaultSeriesMeta);
   const [showKeyboard, setShowKeyboard] = useState(false);
+  const [loadingEpisode, setLoadingEpisode] = useState(false);
 
   useEffect(() => {
     const requestedType = searchParams.get('type');
@@ -167,6 +168,9 @@ export default function DashboardUI() {
     const item = normalizeItem(rawItem as MediaItem, activeTab);
     setSelectedItem(item);
     setActiveMirror(0);
+    setSeason(nextSeason);
+    setEpisode(nextEpisode);
+    setLoadingEpisode(true);
 
     try {
       if ((item.media_type || activeTab) === 'tv') {
@@ -183,6 +187,8 @@ export default function DashboardUI() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoadingEpisode(false);
     }
   };
 
@@ -214,6 +220,19 @@ export default function DashboardUI() {
     setWatchlist((current) => current.filter((item) => item.id !== id));
   };
 
+  const seasonOptions = useMemo(
+    () => Array.from({ length: Math.max(1, seriesMeta.number_of_seasons) }, (_, index) => index + 1),
+    [seriesMeta.number_of_seasons],
+  );
+  const currentSeasonEpisodeCount = useMemo(() => {
+    const seasonData = seriesMeta.seasons.find((item) => item.season_number === season);
+    return Math.max(1, seasonData?.episode_count || 1);
+  }, [season, seriesMeta.seasons]);
+  const episodeOptions = useMemo(
+    () => Array.from({ length: currentSeasonEpisodeCount }, (_, index) => index + 1),
+    [currentSeasonEpisodeCount],
+  );
+
   const updateSeriesPosition = (nextSeason: number, nextEpisode: number) => {
     const safeSeason = Math.min(Math.max(1, nextSeason), seasonOptions.length || 1);
     const safeEpisodeCount = Math.max(1, seriesMeta.seasons.find((item) => item.season_number === safeSeason)?.episode_count || 1);
@@ -221,8 +240,11 @@ export default function DashboardUI() {
 
     setSeason(safeSeason);
     setEpisode(safeEpisode);
+  };
+
+  const loadSelectedEpisode = () => {
     if (selectedItem) {
-      loadStream(selectedItem, safeSeason, safeEpisode);
+      loadStream(selectedItem, season, episode);
     }
   };
 
@@ -265,18 +287,23 @@ export default function DashboardUI() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedItem, selectedStream, activeSources, activeMirror, currentSource, playerLocked]);
 
-  const seasonOptions = useMemo(
-    () => Array.from({ length: Math.max(1, seriesMeta.number_of_seasons) }, (_, index) => index + 1),
-    [seriesMeta.number_of_seasons],
-  );
-  const currentSeasonEpisodeCount = useMemo(() => {
-    const seasonData = seriesMeta.seasons.find((item) => item.season_number === season);
-    return Math.max(1, seasonData?.episode_count || 1);
-  }, [season, seriesMeta.seasons]);
-  const episodeOptions = useMemo(
-    () => Array.from({ length: currentSeasonEpisodeCount }, (_, index) => index + 1),
-    [currentSeasonEpisodeCount],
-  );
+  const nextEpisodePosition = useMemo(() => {
+    if (episode < currentSeasonEpisodeCount) {
+      return { season, episode: episode + 1 };
+    }
+
+    if (season < seasonOptions.length) {
+      return { season: season + 1, episode: 1 };
+    }
+
+    return null;
+  }, [currentSeasonEpisodeCount, episode, season, seasonOptions.length]);
+
+  const loadNextEpisode = () => {
+    if (selectedItem && nextEpisodePosition) {
+      loadStream(selectedItem, nextEpisodePosition.season, nextEpisodePosition.episode);
+    }
+  };
 
   const loadSeriesMeta = async (item: MediaItem) => {
     if ((item.media_type || activeTab) !== 'tv') {
@@ -530,29 +557,54 @@ export default function DashboardUI() {
                     <h3 className="text-sm font-black">Series picker</h3>
                     <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-black">S{season} E{episode}</span>
                   </div>
-                  <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-neutral-500">Season</p>
-                  <div className="grid grid-cols-[repeat(auto-fit,minmax(42px,1fr))] gap-2">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-neutral-500" htmlFor="season-select">Season</label>
+                  <select
+                    id="season-select"
+                    value={season}
+                    onChange={(event) => updateSeriesPosition(Number(event.target.value), 1)}
+                    className="h-11 w-full rounded-xl border border-white/10 bg-black px-3 text-sm font-black text-white outline-none transition focus:border-white/50"
+                  >
                     {seasonOptions.map((option) => (
-                      <button
-                        key={option}
-                        onClick={() => updateSeriesPosition(option, 1)}
-                        className={`h-10 min-w-0 rounded-xl text-sm font-black transition ${season === option ? 'bg-white text-black' : 'bg-black text-neutral-300 hover:bg-white/10 hover:text-white'}`}
-                      >
-                        {option}
-                      </button>
+                      <option key={option} value={option}>Season {option}</option>
                     ))}
+                  </select>
+                  <div className="mb-2 mt-4 flex items-center justify-between">
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-neutral-500">Episodes</p>
+                    <span className="text-xs font-bold text-neutral-500">Choose, then load</span>
                   </div>
-                  <p className="mb-2 mt-4 text-xs font-bold uppercase tracking-[0.16em] text-neutral-500">Episode</p>
-                  <div className="grid max-h-40 grid-cols-[repeat(auto-fit,minmax(38px,1fr))] gap-2 overflow-y-auto pr-1">
+                  <div className="grid max-h-64 gap-2 overflow-y-auto pr-1">
                     {episodeOptions.map((option) => (
                       <button
                         key={option}
+                        type="button"
                         onClick={() => updateSeriesPosition(season, option)}
-                        className={`h-10 min-w-0 rounded-xl text-sm font-black transition ${episode === option ? 'bg-white text-black' : 'bg-black text-neutral-300 hover:bg-white/10 hover:text-white'}`}
+                        className={`flex min-h-14 items-center justify-between rounded-xl border px-3 text-left transition ${episode === option ? 'border-white bg-white text-black' : 'border-white/10 bg-black text-neutral-300 hover:border-white/30 hover:bg-white/10 hover:text-white'}`}
                       >
-                        {option}
+                        <span>
+                          <span className="block text-[10px] font-black uppercase tracking-[0.16em] opacity-60">Episode</span>
+                          <span className="text-sm font-black">{option}</span>
+                        </span>
+                        <span className="text-xs font-bold opacity-60">S{season} E{option}</span>
                       </button>
                     ))}
+                  </div>
+                  <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={loadSelectedEpisode}
+                      disabled={loadingEpisode}
+                      className="rounded-xl bg-white px-3 py-3 text-sm font-black text-black transition hover:bg-neutral-200 disabled:cursor-wait disabled:opacity-60"
+                    >
+                      {loadingEpisode ? 'Loading...' : `Load S${season} E${episode}`}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={loadNextEpisode}
+                      disabled={!nextEpisodePosition || loadingEpisode}
+                      className="rounded-xl border border-white/15 bg-black px-3 py-3 text-sm font-black text-white transition hover:border-white/40 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Next episode
+                    </button>
                   </div>
                 </div>
               )}
