@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Player from '../components/player';
 import Catalog from './catalog';
+import HeroBanner from './hero-banner';
 import LatestSection from './latest';
 import SearchPanel from './search-panel';
 import Watchlist, { WatchlistItem, WatchlistMediaKind } from './watchlist';
@@ -51,12 +52,12 @@ const defaultSeriesMeta = {
 };
 
 const supportedPlatforms = [
-  { name: 'Netflix', mark: 'N', image: 'https://cdn.simpleicons.org/netflix/E50914' },
-  { name: 'Hulu', mark: 'H', image: 'https://cdn.simpleicons.org/hulu/1CE783' },
-  { name: 'HBO Max', mark: 'HBO', image: 'https://cdn.simpleicons.org/hbo/FFFFFF' },
-  { name: 'Disney+', mark: 'D+', image: 'https://cdn.simpleicons.org/disneyplus/113CCF' },
-  { name: 'Prime Video', mark: 'P', image: 'https://cdn.simpleicons.org/amazonprime/00A8E1' },
-  { name: 'Apple TV+', mark: 'TV', image: 'https://cdn.simpleicons.org/appletv/FFFFFF' },
+  { name: 'Netflix', color: 'from-red-600 to-red-700', svg: 'M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm-10 10H8v4h2v-4Zm4-2h2v6h-2v-6Zm4-2h2v8h-2v-8Z' },
+  { name: 'Hulu', color: 'from-green-500 to-green-600', svg: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm-2 15h-2V9h2v8Zm4-8h2v8h-2v-8Zm4 6h-2V9h2v6Z' },
+  { name: 'HBO Max', color: 'from-purple-700 to-purple-800', svg: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8Zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5Zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11Zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5Z' },
+  { name: 'Disney+', color: 'from-blue-500 to-blue-600', svg: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm-4 15h2V9h-2v8Zm4-8h2v8h-2v-8Zm4 6h-2V9h2v6Z' },
+  { name: 'Prime Video', color: 'from-blue-600 to-blue-700', svg: 'M19.35 10.04C18.67 6.59 15.64 4 12 4c-1.48 0-2.85.43-4.01 1.17l1.46 1.46C10.21 5.23 11.08 5 12 5c3.04 0 5.64 1.99 6.59 4.71l2.76-2.67zM4 12.01h9v2H4zm15.64 2.75c.9-1.76 1.36-3.74 1.36-5.76 0-2.77-.88-5.35-2.39-7.47L16 5.07C17.15 6.78 18 8.99 18 12.01h2z' },
+  { name: 'Apple TV+', color: 'from-gray-800 to-gray-900', svg: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm-2 15h-2V9h2v8Zm4-8h2v8h-2v-8Zm4 6h-2V9h2v6Z' },
 ];
 
 export type IconName = 'search' | 'bookmark' | 'check' | 'play' | 'tv' | 'film' | 'radio' | 'spark' | 'grid' | 'keyboard';
@@ -368,12 +369,20 @@ export default function DashboardUI() {
         </div>
         <div className="mt-3 flex gap-3 overflow-x-auto pb-1">
           {supportedPlatforms.map((platform) => (
-            <div key={platform.name} className="flex min-w-[132px] items-center gap-3 rounded-xl border border-white/10 bg-white/[0.045] px-3 py-3 transition hover:border-white/30 hover:bg-white/[0.08]">
-              <span className="relative grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-black/60 text-[10px] font-black text-white">
-                <span>{platform.mark}</span>
-                <img src={platform.image} alt="" className="absolute inset-1 h-6 w-6 object-contain" onError={(event) => { event.currentTarget.style.display = 'none'; }} />
+            <div 
+              key={platform.name} 
+              className={`flex min-w-[140px] items-center gap-3 rounded-xl border border-white/10 bg-gradient-to-br ${platform.color} px-3 py-3 transition hover:border-white/40 hover:shadow-lg hover:shadow-white/20`}
+            >
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/40">
+                <svg 
+                  aria-hidden="true"
+                  viewBox="0 0 24 24" 
+                  className="h-5 w-5 fill-white"
+                >
+                  <path d={platform.svg} />
+                </svg>
               </span>
-              <span className="whitespace-nowrap text-xs font-black text-neutral-200">{platform.name}</span>
+              <span className="whitespace-nowrap text-xs font-black text-white">{platform.name}</span>
             </div>
           ))}
         </div>
@@ -628,7 +637,15 @@ export default function DashboardUI() {
         </section>
       )}
 
-      <div className="mx-auto max-w-[1500px] px-4 pb-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1500px] px-4 pb-6 sm:px-6 lg:px-8">        {!selectedStream && items.length > 0 && (
+          <HeroBanner
+            item={items[0]}
+            onSelect={(id) => {
+              const selectedItem = items.find((item) => item.id === id);
+              if (selectedItem) loadStream(selectedItem, 1, 1);
+            }}
+          />
+        )}
         <LatestSection
           title={searchQuery ? `Fresh picks for “${searchQuery}”` : `Latest ${activeTabMeta.label.toLowerCase()}`}
           subtitle={loading ? 'Loading...' : `${items.length} titles`}
@@ -639,8 +656,8 @@ export default function DashboardUI() {
         />
       </div>
 
-      <div className="mx-auto max-w-[1500px] grid gap-5 px-4 pb-8 sm:px-6 lg:grid-cols-[340px_minmax(0,1fr)] lg:px-8">
-        <aside id="my-list" className="space-y-5">
+      <div className="mx-auto max-w-[1500px] space-y-5 px-4 pb-8 sm:px-6 lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-5 lg:space-y-0 lg:px-8">
+        <aside className="space-y-5">
           <SearchPanel
             activeTabLabel={activeTabMeta.label}
             query={searchQuery}

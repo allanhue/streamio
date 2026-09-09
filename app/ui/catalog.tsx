@@ -34,27 +34,33 @@ function CatalogIcon({ name }: { name: CatalogProps['activeIcon'] }) {
 
 function CatalogCard({ item, activeIcon, saved, onSelect, onSave }: { item: CatalogItem; activeIcon: CatalogProps['activeIcon']; saved: boolean; onSelect: (item: CatalogItem) => void; onSave: (item: CatalogItem) => void }) {
   const image = item.poster || item.thumbnail;
+  const description = (item as any).summary || (item as any).description || '';
 
   return (
-    <article className="group cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-black transition duration-200 hover:-translate-y-1 hover:border-white/30 hover:shadow-xl hover:shadow-black/40">
-      <button type="button" onClick={() => onSelect(item)} className="block w-full cursor-pointer text-left">
-        <div className="relative aspect-[2/3] overflow-hidden bg-neutral-900">
+    <article className="netflix-card group flex flex-col overflow-hidden rounded-lg border border-white/10 bg-black">
+      <button type="button" onClick={() => onSelect(item)} className="block flex-1 cursor-pointer text-left">
+        <div className="relative aspect-[2/3] w-full overflow-hidden bg-neutral-900">
           {image ? (
-            <img src={image} alt={item.title} loading="lazy" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+            <img src={image} alt={item.title} loading="lazy" className="h-full w-full object-cover transition duration-300 group-hover:scale-110" />
           ) : (
             <div className="flex h-full items-center justify-center text-neutral-600"><CatalogIcon name={activeIcon} /></div>
           )}
-          {item.rating ? <span className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-1 text-xs font-black text-white backdrop-blur">{item.rating}</span> : null}
+          {item.rating && (
+            <span className="absolute right-2 top-2 rounded-lg bg-black/70 px-2 py-1 text-xs font-black text-white backdrop-blur-md">
+              {item.rating}
+            </span>
+          )}
         </div>
-        <div className="min-h-[88px] p-3">
-          <h3 className="line-clamp-2 text-sm font-black leading-tight">{item.title}</h3>
-          <p className="mt-2 truncate text-xs font-semibold text-neutral-500">{item.published || item.competition || 'Ready to stream'}</p>
+        <div className="flex flex-1 flex-col gap-1.5 p-2">
+          <h3 className="line-clamp-1 text-xs font-black leading-tight">{item.title}</h3>
+          {description && <p className="line-clamp-1 text-[11px] text-neutral-400 leading-relaxed">{description}</p>}
+          <p className="line-clamp-1 text-[10px] font-semibold text-neutral-500">{item.published || item.competition || 'Ready'}</p>
         </div>
       </button>
       <button
         type="button"
         onClick={() => onSave(item)}
-        className={`flex h-10 w-full cursor-pointer items-center justify-center gap-2 border-t border-white/10 text-xs font-black uppercase tracking-[0.12em] transition ${saved ? 'bg-white text-black' : 'bg-white/[0.04] text-neutral-300 hover:bg-white hover:text-black'}`}
+        className={`flex h-8 w-full cursor-pointer items-center justify-center gap-1.5 border-t border-white/10 text-[10px] font-black uppercase tracking-[0.08em] transition ${saved ? 'bg-white text-black' : 'bg-white/[0.04] text-neutral-300 hover:bg-white hover:text-black'}`}
       >
         <span aria-hidden="true">{saved ? '✓' : '+'}</span>
         {saved ? 'Saved' : 'Save'}
@@ -75,13 +81,13 @@ export default function Catalog({ items, activeTabLabel, activeIcon, query, load
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          {Array.from({ length: 10 }, (_, index) => <div key={index} className="h-72 animate-pulse rounded-2xl bg-white/5" />)}
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+          {Array.from({ length: 12 }, (_, index) => <div key={index} className="aspect-[2/3] animate-pulse rounded-lg bg-white/5" />)}
         </div>
       ) : items.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/10 bg-black/30 p-10 text-center text-neutral-500">No items found for this catalog.</div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
           {items.map((item) => (
             <CatalogCard key={`${item.media_type || activeIcon}-${item.id}`} item={item} activeIcon={activeIcon} saved={savedIds.has(item.id)} onSelect={onSelect} onSave={onSave} />
           ))}
