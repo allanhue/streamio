@@ -51,7 +51,7 @@ def resolve_stream_sources(
         return {
             "id": media_id or "sports-live",
             "title": "Sports Coverage",
-            "sources": stream_pool,
+            "sources": DEFAULT_STREAMS.get("sports", []),
             "isLive": True,
             "isSeries": False,
         }

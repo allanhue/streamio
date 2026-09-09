@@ -1,10 +1,10 @@
 import { Suspense } from 'react';
-import DashboardUI from './ui/dashboard';
+import HomeUI from './ui/home';
 
 export default function Page() {
   return (
     <Suspense fallback={null}>
-      <DashboardUI />
+      <HomeUI />
     </Suspense>
   );
 }

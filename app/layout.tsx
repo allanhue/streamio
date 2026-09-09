@@ -1,7 +1,8 @@
 import './globals.css';
 import React from 'react';
+import Navigation from './components/navigation';
 import Navbar from './components/navbar';
-import PwaRegister from './components/pwa-register';
+import PwaRegister from './components/pwa_register';
 import { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
@@ -29,7 +30,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       >
         <PwaRegister />
         <Navbar />
-        <main className="pt-16">{children}</main>
+        <Navigation />
+        <main>{children}</main>
       </body>
     </html>
   );

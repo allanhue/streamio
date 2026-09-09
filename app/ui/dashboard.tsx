@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Player from '../components/player';
-import Catalog from './catalog';
+import CategorySection from './category_section';
 import HeroBanner from './hero-banner';
-import LatestSection from './latest';
-import SearchPanel from './search-panel';
+import LatestList from './latest_list';
+import SearchPanel from './search_panel';
+import SportsStreams from './sports_streams';
 import Watchlist, { WatchlistItem, WatchlistMediaKind } from './watchlist';
 
 type MediaKind = 'movie' | 'tv' | 'sports';
@@ -44,6 +45,16 @@ const suggestedSearches: Record<MediaKind, string[]> = {
   tv: ['Money Heist', 'Breaking Bad', 'The Boys', 'Severance'],
   sports: ['football', 'premier league', 'ufc', 'formula 1'],
 };
+
+const defaultLiveStreams = [
+  { name: 'Live Sports HD', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
+  { name: 'Red Bull TV', url: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8' },
+  { name: 'Open Coverage', url: 'https://d3rlna7iyuk8km.cloudfront.net/ATVafrica/atvamericas/s.m3u8' },
+  { name: 'Akamai Live Test 1', url: 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8' },
+  { name: 'Akamai Live Test 2', url: 'https://moctobpltc-i.akamaihd.net/hls/live/571329/eight/playlist.m3u8' },
+  { name: 'Apple BipBop Sample', url: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8' },
+  { name: 'Unified Stream Test', url: 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8' },
+];
 
 const defaultSeriesMeta = {
   number_of_seasons: 1,
@@ -388,6 +399,8 @@ export default function DashboardUI() {
         </div>
       </section>
 
+
+
       {selectedStream && selectedItem && (
         <section className="px-4 pb-5 sm:px-6 lg:px-8">
           <div className="grid min-w-0 max-w-full gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(260px,340px)]">
@@ -637,27 +650,21 @@ export default function DashboardUI() {
         </section>
       )}
 
-      <div className="mx-auto max-w-[1500px] px-4 pb-6 sm:px-6 lg:px-8">        {!selectedStream && items.length > 0 && (
-          <HeroBanner
-            item={items[0]}
-            onSelect={(id) => {
-              const selectedItem = items.find((item) => item.id === id);
-              if (selectedItem) loadStream(selectedItem, 1, 1);
-            }}
-          />
-        )}
-        <LatestSection
-          title={searchQuery ? `Fresh picks for “${searchQuery}”` : `Latest ${activeTabMeta.label.toLowerCase()}`}
-          subtitle={loading ? 'Loading...' : `${items.length} titles`}
-          items={items}
-          onSelect={(item) => loadStream(item, 1, 1)}
-          onSave={(item) => toggleWatchlist(item)}
-          savedIds={new Set(watchlist.map((entry) => entry.id))}
-        />
+      <div className="mx-auto max-w-[1500px] space-y-5 px-4 pb-8 sm:px-6 lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-5 lg:space-y-0 lg:px-8">
+
       </div>
 
       <div className="mx-auto max-w-[1500px] space-y-5 px-4 pb-8 sm:px-6 lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-5 lg:space-y-0 lg:px-8">
         <aside className="space-y-5">
+          <LatestList
+            items={items}
+            activeId={selectedItem?.id}
+            loading={loading}
+            onSelect={(item) => loadStream(item, 1, 1)}
+            onSave={(item: WatchlistItem) => toggleWatchlist(item)}
+            savedIds={new Set(watchlist.map((entry) => entry.id))}
+          />
+
           <SearchPanel
             activeTabLabel={activeTabMeta.label}
             query={searchQuery}
@@ -676,16 +683,50 @@ export default function DashboardUI() {
           />
         </aside>
 
-        <Catalog
-          items={items}
-          activeTabLabel={activeTabMeta.label}
-          activeIcon={activeTabMeta.icon}
-          query={searchQuery}
-          loading={loading}
-          savedIds={new Set(watchlist.map((entry) => entry.id))}
-          onSelect={(item) => loadStream(item, 1, 1)}
-          onSave={(item) => toggleWatchlist(item)}
-        />
+        <div className="space-y-6">
+          {selectedItem && <HeroBanner item={selectedItem} onSelect={() => {}} />}
+
+          <CategorySection
+            title="Movies"
+            icon="film"
+            items={items.filter((i) => (i.media_type || activeTab) === 'movie')}
+            loading={loading && activeTab === 'movie'}
+            savedIds={new Set(watchlist.map((entry) => entry.id))}
+            onSelect={(item: WatchlistItem) => loadStream(item, 1, 1)}
+            onSave={(item: WatchlistItem) => toggleWatchlist(item)}
+          />
+
+          <CategorySection
+            title="Series"
+            icon="tv"
+            items={items.filter((i) => (i.media_type || activeTab) === 'tv')}
+            loading={loading && activeTab === 'tv'}
+            savedIds={new Set(watchlist.map((entry) => entry.id))}
+            onSelect={(item: WatchlistItem) => loadStream(item, 1, 1)}
+            onSave={(item: WatchlistItem) => toggleWatchlist(item)}
+          />
+
+          <div>
+            <SportsStreams
+              sources={defaultLiveStreams}
+              onSelectStream={(source) => {
+                if (selectedItem) {
+                  loadStream({ ...selectedItem, url: source.url }, 1, 1);
+                }
+              }}
+            />
+
+            <CategorySection
+              title="Sports On Demand"
+              icon="radio"
+              items={items.filter((i) => (i.media_type || activeTab) === 'sports')}
+              loading={loading && activeTab === 'sports'}
+              savedIds={new Set(watchlist.map((entry) => entry.id))}
+              onSelect={(item: WatchlistItem) => loadStream(item, 1, 1)}
+              onSave={(item: WatchlistItem) => toggleWatchlist(item)}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
