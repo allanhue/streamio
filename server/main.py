@@ -38,12 +38,12 @@ app = FastAPI(lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 @app.get("/api/feed")
-def get_feed(type: str = Query("movie"), query: str = Query(None)):
+def get_feed(type: str = Query("movie"), query: str = Query(None), list: str = Query(None)):
     if type == "sports":
         return {"type": "sports", "items": fetch_live_sports(search_query=query)}
     else:
-        # type can be 'movie' or 'tv'
-        return {"type": type, "items": fetch_media(media_type=type, search_query=query)}
+        # type can be 'movie' or 'tv'; list can be popular / upcoming / top_rated
+        return {"type": type, "items": fetch_media(media_type=type, search_query=query, list_name=list)}
 
 @app.get("/api/media-details")
 def get_media_details(id: str = Query(...), type: str = Query("movie")):

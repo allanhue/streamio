@@ -72,6 +72,9 @@ function CategoryCard({
               {(item as any).rating}
             </span>
           )}
+          <span className="absolute inset-0 grid place-items-center bg-black/0 opacity-0 transition group-hover:bg-black/35 group-hover:opacity-100">
+            <span className="grid h-12 w-12 place-items-center rounded-full bg-white text-lg text-black">▶</span>
+          </span>
         </div>
 
         <div className="flex flex-1 flex-col gap-1.5 p-2">

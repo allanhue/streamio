@@ -1,10 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import FeaturedPlatforms from './featured_platforms';
 import LatestList from './latest_list';
+import MediaCarousel from './media_carousel';
 import SearchPanel from './search_panel';
 import Watchlist, { WatchlistItem } from './watchlist';
+import { buildWatchHref } from '../lib/watch';
 
 type MediaItem = WatchlistItem & {
   summary?: string;
@@ -63,8 +66,12 @@ const featuredPlatforms = [
 const suggestedSearches = ['Dune', 'John Wick', 'Oppenheimer', 'Breaking Bad', 'The Boys'];
 
 export default function HomeUI() {
+  const router = useRouter();
   const [items, setItems] = useState<MediaItem[]>([]);
+  const [popular, setPopular] = useState<MediaItem[]>([]);
+  const [upcoming, setUpcoming] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [carouselLoading, setCarouselLoading] = useState(true);
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -81,12 +88,16 @@ export default function HomeUI() {
   }, []);
 
   useEffect(() => {
+    window.localStorage.setItem('streamio-watchlist', JSON.stringify(watchlist));
+  }, [watchlist]);
+
+  useEffect(() => {
     const delay = window.setTimeout(() => {
       setLoading(true);
       fetch(buildApiUrl('/api/feed?type=movie&query='))
         .then((res) => res.json())
         .then((data) => {
-          const nextItems = (data.items || []).slice(0, 10).map((item: any) => ({
+          const nextItems = (data.items || []).slice(0, 10).map((item: MediaItem) => ({
             ...item,
             media_type: item.media_type || 'movie',
             poster: item.poster || item.thumbnail,
@@ -102,6 +113,47 @@ export default function HomeUI() {
 
     return () => window.clearTimeout(delay);
   }, []);
+
+  useEffect(() => {
+    setCarouselLoading(true);
+    Promise.all([
+      fetch(buildApiUrl('/api/feed?type=movie&list=popular')).then((res) => res.json()),
+      fetch(buildApiUrl('/api/feed?type=movie&list=upcoming')).then((res) => res.json()),
+    ])
+      .then(([popularData, upcomingData]) => {
+        setPopular(
+          (popularData.items || []).map((item: MediaItem) => ({
+            ...item,
+            media_type: 'movie' as const,
+            poster: item.poster || item.thumbnail,
+          })),
+        );
+        setUpcoming(
+          (upcomingData.items || []).map((item: MediaItem) => ({
+            ...item,
+            media_type: 'movie' as const,
+            poster: item.poster || item.thumbnail,
+          })),
+        );
+        setCarouselLoading(false);
+      })
+      .catch(() => {
+        setPopular([]);
+        setUpcoming([]);
+        setCarouselLoading(false);
+      });
+  }, []);
+
+  const openItem = (item: WatchlistItem) => {
+    router.push(
+      buildWatchHref({
+        id: item.id,
+        title: item.title,
+        media_type: item.media_type || 'movie',
+        url: item.url,
+      }),
+    );
+  };
 
   const toggleWatchlist = (item: WatchlistItem) => {
     setWatchlist((current) => {
@@ -127,13 +179,30 @@ export default function HomeUI() {
 
       <FeaturedPlatforms platforms={featuredPlatforms} />
 
+      <section className="mx-auto max-w-[1500px] space-y-6 px-4 pb-4 sm:px-6 lg:px-8">
+        <MediaCarousel
+          title="Popular Movies"
+          subtitle="TMDB · Popular"
+          items={popular}
+          loading={carouselLoading}
+          direction="right"
+        />
+        <MediaCarousel
+          title="Upcoming Releases"
+          subtitle="TMDB · Upcoming"
+          items={upcoming}
+          loading={carouselLoading}
+          direction="left"
+        />
+      </section>
+
       <section className="mx-auto max-w-[1500px] space-y-5 px-4 pb-8 sm:px-6 lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-5 lg:space-y-0 lg:px-8">
         <aside className="space-y-5">
           <LatestList
             items={items}
             activeId={undefined}
             loading={loading}
-            onSelect={() => {}}
+            onSelect={openItem}
             onSave={(item) => toggleWatchlist(item)}
             savedIds={new Set(watchlist.map((entry) => entry.id))}
           />
@@ -151,7 +220,7 @@ export default function HomeUI() {
           <Watchlist
             items={watchlist}
             activeId={undefined}
-            onSelect={() => {}}
+            onSelect={openItem}
             onRemove={removeFromWatchlist}
           />
         </aside>

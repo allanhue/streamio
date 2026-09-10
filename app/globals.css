@@ -54,6 +54,41 @@ main {
   background: #a3a3a3;
 }
 
+/* Auto-moving media carousels */
+@keyframes mediaMarqueeRight {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes mediaMarqueeLeft {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.media-marquee {
+  will-change: transform;
+}
+
+.media-marquee-right {
+  animation: mediaMarqueeRight 48s linear infinite;
+}
+
+.media-marquee-left {
+  animation: mediaMarqueeLeft 48s linear infinite;
+}
+
+.carousel-track:hover .media-marquee {
+  animation-play-state: paused;
+}
+
 /* Netflix-style horizontal scrolling rows */
 .content-row {
   display: flex;

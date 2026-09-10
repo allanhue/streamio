@@ -159,11 +159,17 @@ def fetch_media_details(media_type="movie", media_id=None):
         return {}
 
 
-def fetch_media(media_type="movie", search_query=None):
-    """Fetches Movies or TV Series (like Money Heist) from TMDB."""
+def fetch_media(media_type="movie", search_query=None, list_name=None):
+    """Fetches Movies or TV Series from TMDB (trending, popular, upcoming, or search)."""
     try:
         if search_query:
             url = f"https://api.themoviedb.org/3/search/{media_type}?api_key={TMDB_API_KEY}&query={search_query}&page=1"
+        elif list_name == "popular":
+            url = f"https://api.themoviedb.org/3/{media_type}/popular?api_key={TMDB_API_KEY}&page=1"
+        elif list_name == "upcoming" and media_type == "movie":
+            url = f"https://api.themoviedb.org/3/movie/upcoming?api_key={TMDB_API_KEY}&page=1"
+        elif list_name == "top_rated":
+            url = f"https://api.themoviedb.org/3/{media_type}/top_rated?api_key={TMDB_API_KEY}&page=1"
         else:
             url = f"https://api.themoviedb.org/3/trending/{media_type}/day?api_key={TMDB_API_KEY}"
 
@@ -181,6 +187,7 @@ def fetch_media(media_type="movie", search_query=None):
                 "title": title,
                 "rating": round(item.get("vote_average", 0), 1),
                 "poster": f"https://image.tmdb.org/t/p/w500{item.get('poster_path')}",
+                "summary": (item.get("overview") or "")[:160],
                 "published": item.get("release_date") or item.get("first_air_date") or "N/A",
                 "media_type": media_type,
                 "number_of_seasons": details.get("number_of_seasons"),

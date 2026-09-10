@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import CategorySection from '../ui/category_section';
-import HeroBanner from '../ui/hero-banner';
-import LatestList from '../ui/latest_list';
 import SearchPanel from '../ui/search_panel';
 import Watchlist, { WatchlistItem } from '../ui/watchlist';
+import { buildWatchHref } from '../lib/watch';
 
 type MediaItem = WatchlistItem & {
   summary?: string;
@@ -23,8 +23,8 @@ function buildApiUrl(path: string): string {
 }
 
 export default function MoviesPage() {
+  const router = useRouter();
   const [items, setItems] = useState<MediaItem[]>([]);
-  const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [showKeyboard, setShowKeyboard] = useState(false);
@@ -51,9 +51,9 @@ export default function MoviesPage() {
       fetch(buildApiUrl(`/api/feed?type=movie&query=${encodeURIComponent(searchQuery)}`))
         .then((res) => res.json())
         .then((data) => {
-          const nextItems = (data.items || []).map((item: any) => ({
+          const nextItems = (data.items || []).map((item: MediaItem) => ({
             ...item,
-            media_type: 'movie',
+            media_type: 'movie' as const,
             poster: item.poster || item.thumbnail,
           }));
           setItems(nextItems);
@@ -67,6 +67,17 @@ export default function MoviesPage() {
 
     return () => window.clearTimeout(delay);
   }, [searchQuery]);
+
+  const openItem = (item: WatchlistItem) => {
+    router.push(
+      buildWatchHref({
+        id: item.id,
+        title: item.title,
+        media_type: item.media_type || 'movie',
+        url: item.url,
+      }),
+    );
+  };
 
   const toggleWatchlist = (item: WatchlistItem) => {
     setWatchlist((current) => {
@@ -92,15 +103,6 @@ export default function MoviesPage() {
 
       <section className="mx-auto max-w-[1500px] space-y-5 px-4 pb-8 sm:px-6 lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-5 lg:space-y-0 lg:px-8">
         <aside className="space-y-5">
-          <LatestList
-            items={items}
-            activeId={selectedItem?.id}
-            loading={loading}
-            onSelect={(item) => setSelectedItem(item as MediaItem)}
-            onSave={(item) => toggleWatchlist(item)}
-            savedIds={new Set(watchlist.map((entry) => entry.id))}
-          />
-
           <SearchPanel
             activeTabLabel="Movies"
             query={searchQuery}
@@ -113,22 +115,20 @@ export default function MoviesPage() {
 
           <Watchlist
             items={watchlist}
-            activeId={selectedItem?.id}
-            onSelect={(item) => setSelectedItem(item as MediaItem)}
+            activeId={undefined}
+            onSelect={openItem}
             onRemove={removeFromWatchlist}
           />
         </aside>
 
         <div className="space-y-6">
-          {selectedItem && <HeroBanner item={selectedItem} onSelect={() => {}} />}
-
           <CategorySection
             title="Latest Movies"
             icon="film"
             items={items}
             loading={loading}
             savedIds={new Set(watchlist.map((entry) => entry.id))}
-            onSelect={(item: WatchlistItem) => setSelectedItem(item as MediaItem)}
+            onSelect={openItem}
             onSave={(item: WatchlistItem) => toggleWatchlist(item)}
           />
         </div>
