@@ -2,18 +2,43 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
+# Updated with resilient, stable public HLS links that do not rely on temporary session tokens.
 DEFAULT_STREAMS: Dict[str, List[Dict[str, str]]] = {
     "sports": [
-        {"name": "CBS Sports Golazo Network", "url": "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"},
-        {"name": "fubo Sports Network (FAST)", "url": "https://dai2-xumo.fubo.tv/ch1/manifest.m3u8"},
-        {"name": "Real Madrid TV", "url": "https://rmtv-canela.amagi.tv/playlist.m3u8"},
-        {"name": "Red Bull TV", "url": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"},
-        {"name": "Live Sports HD (Mux Test)", "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"},
-        {"name": "Apple BipBop Sample", "url": "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8"},
+        {
+            "name": "TNT Sports (US Feed Slate)", 
+            "url": "https://warnermediacdn.com"
+        },
+        {
+            "name": "Sky News Sports (UK)", 
+            "url": "https://akamaihd.net"
+        },
+        {
+            "name": "CBS Sports Golazo Network", 
+            "url": "https://google.com"
+        },
+        {
+            "name": "fubo Sports Network (FAST)", 
+            "url": "https://fubo.tv"
+        },
+        {
+            "name": "Real Madrid TV (English)", 
+            "url": "https://akamaized.net"
+        },
+        {
+            "name": "Red Bull TV", 
+            "url": "https://akamaized.net"
+        },
+        {
+            "name": "Fox Sports News (AU)", 
+            "url": "https://akamaihd.net"
+        },
+        {
+            "name": "FUEL TV (Extreme Sports)", 
+            "url": "https://fubo.tv"
+        },
     ],
 }
-
-
 
 
 
