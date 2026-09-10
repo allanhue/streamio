@@ -2,17 +2,16 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-# Direct HLS sources kept on the backend so the TV app plays from the server-side stream layer
 DEFAULT_STREAMS: Dict[str, List[Dict[str, str]]] = {
     "sports": [
-        {"name": "Live Sports HD", "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"},
-        {"name": "Red Bull TV", "url": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"},
+        {"name": "CBS Sports Golazo Network", "url": "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"},
         {"name": "fubo Sports Network (FAST)", "url": "https://dai2-xumo.fubo.tv/ch1/manifest.m3u8"},
-        {"name": "CBS Sports HQ (FAST)", "url": "https://cbsn-us.cbsnstat.com/m3u8/master.m3u8"},
+        {"name": "Real Madrid TV", "url": "https://rmtv-canela.amagi.tv/playlist.m3u8"},
+        {"name": "Red Bull TV", "url": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"},
+        {"name": "Live Sports HD (Mux Test)", "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"},
         {"name": "Apple BipBop Sample", "url": "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8"},
     ],
 }
-
 
 
 

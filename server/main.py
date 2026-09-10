@@ -15,9 +15,9 @@ except ImportError:
     from services.rss_services import fetch_live_sports, fetch_media, fetch_media_details
 
 try:
-    from .stream_sources import resolve_stream_sources
+    from .stream_sources import DEFAULT_STREAMS, resolve_stream_sources
 except ImportError:
-    from stream_sources import resolve_stream_sources
+    from stream_sources import DEFAULT_STREAMS, resolve_stream_sources
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
@@ -58,3 +58,22 @@ def get_stream(id: str = Query(...), type: str = Query("movie"), season: int = Q
         episode=episode,
         requested_url=url,
     )
+
+@app.get("/api/live-streams")
+def get_live_streams(type: str = Query("sports")):
+    sources = DEFAULT_STREAMS.get(type, [])
+    items = []
+    for index, source in enumerate(sources):
+        url = (source.get("url") or "").strip()
+        if not url:
+            continue
+        title = (source.get("name") or "").strip() or f"Live Channel {index + 1}"
+        items.append({
+            "id": f"live-{type}-{index + 1}",
+            "title": title,
+            "url": url,
+            "media_type": type,
+            "published": "LIVE",
+            "summary": "Live HLS channel",
+        })
+    return {"type": type, "items": items}

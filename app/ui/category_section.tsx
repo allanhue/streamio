@@ -11,6 +11,7 @@ type CategorySectionProps = {
   savedIds: Set<string>;
   onSelect: (item: WatchlistItem) => void;
   onSave: (item: WatchlistItem) => void;
+  showHero?: boolean;
 };
 
 function CategoryIcon({ name }: { name: 'film' | 'tv' | 'radio' }) {
@@ -114,13 +115,14 @@ export default function CategorySection({
   savedIds,
   onSelect,
   onSave,
+  showHero = true,
 }: CategorySectionProps) {
   const displayItems = items.slice(0, 24);
   const heroItem = displayItems[0];
 
   return (
     <section className="space-y-4">
-      {heroItem && !loading && (
+      {showHero && heroItem && !loading && (
         <HeroBanner
           item={heroItem}
           onSelect={(id) => {
