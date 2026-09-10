@@ -7,11 +7,9 @@ DEFAULT_STREAMS: Dict[str, List[Dict[str, str]]] = {
     "sports": [
         {"name": "Live Sports HD", "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"},
         {"name": "Red Bull TV", "url": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"},
-        {"name": "Open Coverage", "url": "https://d3rlna7iyuk8km.cloudfront.net/ATVafrica/atvamericas/s.m3u8"},
-        {"name": "Akamai Live Test 1", "url": "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8"},
-        {"name": "Akamai Live Test 2", "url": "https://moctobpltc-i.akamaihd.net/hls/live/571329/eight/playlist.m3u8"},
+        {"name": "fubo Sports Network (FAST)", "url": "https://dai2-xumo.fubo.tv/ch1/manifest.m3u8"},
+        {"name": "CBS Sports HQ (FAST)", "url": "https://cbsn-us.cbsnstat.com/m3u8/master.m3u8"},
         {"name": "Apple BipBop Sample", "url": "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8"},
-        {"name": "Unified Stream Test", "url": "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8"},
     ],
 }
 
