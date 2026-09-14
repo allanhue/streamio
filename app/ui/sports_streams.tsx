@@ -58,7 +58,6 @@ export default function SportsStreams({ sources, loading = false, onSelectStream
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.18em] text-neutral-500">Live Channels</p>
-          <h2 className="mt-1 text-xl font-black tracking-tight sm:text-2xl">Watch now</h2>
         </div>
         <p className="text-xs font-bold text-neutral-500">
           {loading ? 'Loading…' : `${sources.length} channel${sources.length === 1 ? '' : 's'}`}

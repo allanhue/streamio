@@ -163,8 +163,7 @@ export default function HomeUI() {
     <div className="min-h-screen bg-[#050505] text-white">
       <section className="mx-auto max-w-[1500px] px-4 py-4 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-white/10 bg-neutral-950/90 p-4 shadow-xl shadow-black sm:p-5">
-          <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Welcome back.</h1>
-          <p className="mt-2 text-sm text-neutral-400">Pick up where you left off or discover something new</p>
+          <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Welcome back!</h1>
         </div>
       </section>
 
@@ -173,14 +172,12 @@ export default function HomeUI() {
       <section className="mx-auto max-w-[1500px] space-y-6 px-4 pb-4 sm:px-6 lg:px-8">
         <MediaCarousel
           title="Popular Movies"
-          subtitle="TMDB · Popular"
           items={popular}
           loading={carouselLoading}
           direction="right"
         />
         <MediaCarousel
           title="Upcoming Releases"
-          subtitle="TMDB · Upcoming"
           items={upcoming}
           loading={carouselLoading}
           direction="left"
