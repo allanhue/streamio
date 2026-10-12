@@ -14,7 +14,7 @@ type MediaCarouselProps = {
 
 export default function MediaCarousel({
   title,
-  subtitle = 'From TMDB',
+  subtitle = '',
   items,
   loading = false,
   direction = 'right',

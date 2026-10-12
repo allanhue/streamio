@@ -16,7 +16,6 @@ export default function FeaturedPlatforms({ platforms }: FeaturedPlatformsProps)
     <section className="mx-auto max-w-[1500px] px-4 pb-6 sm:px-6 lg:px-8">
       <div className="mb-4">
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">Featured</p>
-        <h2 className="mt-1 text-2xl font-black tracking-tight">Supported Platforms</h2>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -42,7 +41,6 @@ export default function FeaturedPlatforms({ platforms }: FeaturedPlatformsProps)
 
               <div>
                 <p className="text-base font-black text-white sm:text-lg">{platform.name}</p>
-                <p className="text-xs text-white/75">Stream your favorites</p>
               </div>
             </div>
           </div>

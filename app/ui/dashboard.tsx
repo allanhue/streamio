@@ -375,7 +375,6 @@ export default function DashboardUI() {
       <section className="mx-auto max-w-[1500px] px-4 pb-5 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">Supported platforms</p>
           </div>
         </div>
         <div className="mt-3 flex gap-3 overflow-x-auto pb-1">
