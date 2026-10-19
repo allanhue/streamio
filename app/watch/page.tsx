@@ -4,7 +4,6 @@ import { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import Player from '../components/player';
-import SecureStreamEmbed from '../components/secure_stream_embed';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 const buildApiUrl = (path: string) => `${API_BASE.replace(/\/$/, '')}${path}`;
@@ -33,7 +32,6 @@ function WatchClient() {
   const [activeMirror, setActiveMirror] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [inlinePlayer, setInlinePlayer] = useState(false);
 
   useEffect(() => {
     if (!id && !url) {
@@ -46,7 +44,6 @@ function WatchClient() {
     setLoading(true);
     setError('');
     setActiveMirror(0);
-    setInlinePlayer(false);
 
     const urlParam = url ? `&url=${encodeURIComponent(url)}` : '';
     const streamId = id || 'custom-stream';
@@ -108,26 +105,17 @@ function WatchClient() {
           ) : isDirectHls && currentSource ? (
             <Player src={currentSource} />
           ) : currentSource ? (
-            inlinePlayer ? (
-              <SecureStreamEmbed
-                src={currentSource}
-                title={title}
-                className="aspect-video h-auto w-full border-0"
-              />
-            ) : (
-              <div className="flex aspect-video flex-col items-center justify-center gap-4 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.1),_transparent_45%)] p-6">
-                <p className="max-w-md text-center text-sm text-neutral-300">
-                  Play the stream here. Popups and navigation outside the player are blocked.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setInlinePlayer(true)}
-                  className="rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200"
-                >
-                  Play in protected player
-                </button>
-              </div>
-            )
+            <div className="flex aspect-video flex-col items-center justify-center gap-4 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.1),_transparent_45%)] p-6">
+              <p className="max-w-md text-center text-sm text-neutral-300">
+                Open the stream in this new tab to start playback.
+              </p>
+              <a
+                href={currentSource}
+                className="rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200"
+              >
+                Open stream
+              </a>
+            </div>
           ) : (
             <div className="grid aspect-video place-items-center text-sm text-neutral-400">No playable source found</div>
           )}
