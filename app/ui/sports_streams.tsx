@@ -65,9 +65,27 @@ export default function SportsStreams({ sources, loading = false, onSelectStream
       </div>
 
       {loading ? (
-        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div
+          className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+          role="status"
+          aria-busy="true"
+          aria-label="Loading live channels"
+        >
           {Array.from({ length: 6 }, (_, i) => (
-            <div key={i} className="aspect-[2/3] animate-pulse rounded-xl bg-white/5" />
+            <div
+              key={i}
+              aria-hidden="true"
+              className="animate-pulse overflow-hidden rounded-xl border border-white/10 bg-black"
+            >
+              <div className="relative aspect-[2/3] bg-white/5">
+                <div className="absolute left-2 top-2 h-4 w-10 rounded bg-white/10" />
+              </div>
+              <div className="space-y-2 p-3">
+                <div className="h-3 w-4/5 rounded bg-white/10" />
+                <div className="h-2.5 w-3/5 rounded bg-white/5" />
+                <div className="h-2 w-2/5 rounded bg-white/5" />
+              </div>
+            </div>
           ))}
         </div>
       ) : sources.length === 0 ? (

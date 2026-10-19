@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import Player from '../components/player';
+import SecureStreamEmbed from '../components/secure_stream_embed';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 const buildApiUrl = (path: string) => `${API_BASE.replace(/\/$/, '')}${path}`;
@@ -108,36 +109,23 @@ function WatchClient() {
             <Player src={currentSource} />
           ) : currentSource ? (
             inlinePlayer ? (
-              <iframe
+              <SecureStreamEmbed
                 src={currentSource}
                 title={title}
                 className="aspect-video h-auto w-full border-0"
-                allowFullScreen
-                allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
-                referrerPolicy="strict-origin-when-cross-origin"
               />
             ) : (
               <div className="flex aspect-video flex-col items-center justify-center gap-4 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.1),_transparent_45%)] p-6">
                 <p className="max-w-md text-center text-sm text-neutral-300">
-                  Ready to play. Open the protected stream or try the inline player.
+                  Play the stream here. Popups and navigation outside the player are blocked.
                 </p>
-                <div className="flex flex-wrap justify-center gap-3">
-                  <a
-                    href={currentSource}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200"
-                  >
-                    Open stream
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => setInlinePlayer(true)}
-                    className="rounded-full border border-white/20 bg-white/10 px-5 py-3 text-sm font-black transition hover:bg-white hover:text-black"
-                  >
-                    Try inline player
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setInlinePlayer(true)}
+                  className="rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200"
+                >
+                  Play in protected player
+                </button>
               </div>
             )
           ) : (

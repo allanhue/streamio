@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Player from '../components/player';
+import SecureStreamEmbed from '../components/secure_stream_embed';
 import CategorySection from '../ui/category_section';
 import SearchPanel from '../ui/search_panel';
 import Watchlist, { WatchlistItem } from '../ui/watchlist';
@@ -246,40 +247,28 @@ export default function SeriesPage() {
                 {isDirectHls && currentSource ? (
                   <Player src={currentSource} />
                 ) : inlinePlayer && currentSource ? (
-                  <iframe
+                  <SecureStreamEmbed
                     src={currentSource}
                     title={selectedItem.title}
                     className={`h-full w-full border-0 ${playerLocked ? 'pointer-events-none' : 'pointer-events-auto'}`}
-                    allowFullScreen
-                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
-                    referrerPolicy="strict-origin-when-cross-origin"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_45%)] p-6">
                     <div className="w-full max-w-xl rounded-[28px] border border-white/10 bg-black/55 p-5 text-center backdrop-blur-sm">
                       <h3 className="text-xl font-black">Ready to play</h3>
                       <p className="mt-2 text-sm text-neutral-300">
-                        Load an episode from the series picker, then open the stream or try the inline player.
+                        Load an episode from the series picker and play it here. Popups and outside navigation are blocked.
                       </p>
                       <div className="mt-5 flex flex-wrap justify-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (currentSource) window.open(currentSource, '_blank', 'noopener,noreferrer');
-                          }}
-                          className="rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200"
-                        >
-                          Open stream
-                        </button>
                         <button
                           type="button"
                           onClick={() => {
                             setInlinePlayer(true);
                             setPlayerLocked(false);
                           }}
-                          className="rounded-full border border-white/15 bg-black px-5 py-3 text-sm font-black transition hover:bg-white/10"
+                          className="rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200"
                         >
-                          Try inline player
+                          Play in protected player
                         </button>
                       </div>
                     </div>

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Player from '../components/player';
+import SecureStreamEmbed from '../components/secure_stream_embed';
 import CategorySection from './category_section';
 import HeroBanner from './hero-banner';
 import LatestList from './latest_list';
@@ -279,11 +280,8 @@ export default function DashboardUI() {
 
       if (event.code === 'Enter' && currentSource && !selectedStream?.isLive) {
         event.preventDefault();
-        if (playerLocked) {
-          setPlayerLocked(false);
-          return;
-        }
-        window.open(currentSource, '_blank', 'noopener,noreferrer');
+        setInlinePlayer(true);
+        setPlayerLocked(false);
       }
 
       if ((event.code === 'ArrowLeft' || event.code === 'ArrowRight') && activeSources.length > 1) {
@@ -423,26 +421,35 @@ export default function DashboardUI() {
                 {isDirectHls && currentSource ? (
                   <Player src={currentSource} />
                 ) : selectedStream.isLive && activeSources[0] ? (
-                  <div className="flex h-full flex-col items-center justify-center gap-4">
-                    <span className="grid h-14 w-14 place-items-center rounded-full bg-white text-black">
-                      <Icon name="radio" className="h-6 w-6" />
-                    </span>
-                    <a href={activeSources[0].url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200">
-                      <Icon name="play" />
-                      Open live stream
-                    </a>
-                  </div>
+                  inlinePlayer ? (
+                    <SecureStreamEmbed
+                      src={activeSources[0].url}
+                      title={selectedItem.title}
+                      className="h-full w-full border-0"
+                    />
+                  ) : (
+                    <div className="flex h-full flex-col items-center justify-center gap-4">
+                      <span className="grid h-14 w-14 place-items-center rounded-full bg-white text-black">
+                        <Icon name="radio" className="h-6 w-6" />
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setInlinePlayer(true)}
+                        className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200"
+                      >
+                        <Icon name="play" />
+                        Play live stream here
+                      </button>
+                    </div>
+                  )
                 ) : (
                   <>
                     {inlinePlayer && currentSource ? (
                       <>
-                        <iframe
+                        <SecureStreamEmbed
                           src={currentSource}
                           title={selectedItem.title}
                           className={`h-full w-full border-0 ${playerLocked ? 'pointer-events-none' : 'pointer-events-auto'}`}
-                          allowFullScreen
-                          allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
-                          referrerPolicy="strict-origin-when-cross-origin"
                         />
 
                         <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-between p-3 opacity-0 transition duration-200 hover:opacity-100 group-hover:opacity-100">
@@ -529,7 +536,7 @@ export default function DashboardUI() {
 
                           <div className="mb-5 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-left">
                             <p className="text-sm leading-6 text-neutral-300">
-                              Some third-party embed sources can trigger file downloads or ad popups. This app keeps the stream protected by default and only opens the inline player when you choose to trust the source.
+                              The player is sandboxed to block popups and navigation away from Streamio. Playback stays in this window.
                             </p>
                           </div>
 
@@ -547,20 +554,12 @@ export default function DashboardUI() {
                             <button
                               type="button"
                               onClick={() => {
-                                if (currentSource) {
-                                  window.open(currentSource, '_blank', 'noopener,noreferrer');
-                                }
+                                setInlinePlayer(true);
+                                setPlayerLocked(false);
                               }}
                               className="rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200"
                             >
-                              Open stream safely
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setInlinePlayer(true)}
-                              className="rounded-full border border-white/15 bg-black px-5 py-3 text-sm font-black text-white transition hover:border-white/30 hover:bg-white/10"
-                            >
-                              Try inline player
+                              Play in protected player
                             </button>
                           </div>
                         </div>

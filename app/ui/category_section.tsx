@@ -146,9 +146,26 @@ export default function CategorySection({
         </div>
 
         {loading ? (
-          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+          <div
+            className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
+            role="status"
+            aria-busy="true"
+            aria-label={`Loading ${title}`}
+          >
             {Array.from({ length: 12 }, (_, i) => (
-              <div key={i} className="aspect-[2/3] animate-pulse rounded-lg bg-white/5" />
+              <div
+                key={i}
+                aria-hidden="true"
+                className="animate-pulse overflow-hidden rounded-lg border border-white/10 bg-black"
+              >
+                <div className="aspect-[2/3] bg-white/5" />
+                <div className="space-y-2 p-2">
+                  <div className="h-3 w-4/5 rounded bg-white/10" />
+                  <div className="h-2.5 w-3/5 rounded bg-white/5" />
+                  <div className="h-2 w-2/5 rounded bg-white/5" />
+                </div>
+                <div className="h-8 border-t border-white/10 bg-white/[0.03]" />
+              </div>
             ))}
           </div>
         ) : displayItems.length === 0 ? (

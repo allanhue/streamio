@@ -1,17 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 import SportsStreams, { type LiveStreamSource } from '../ui/sports_streams';
-import Watchlist, { WatchlistItem } from '../ui/watchlist';
 
-type MediaItem = WatchlistItem & {
-  summary?: string;
+type LiveStreamApiItem = {
+  id?: string;
+  title?: string;
+  name?: string;
+  url?: string;
   poster?: string;
   thumbnail?: string;
-  media_type?: 'movie' | 'tv' | 'sports';
-  rating?: number;
+  published?: string;
 };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
@@ -22,36 +22,14 @@ function buildApiUrl(path: string): string {
 }
 
 export default function SportsPage() {
-  const router = useRouter();
   const [liveStreams, setLiveStreams] = useState<LiveStreamSource[]>([]);
   const [liveLoading, setLiveLoading] = useState(true);
-  const [items, setItems] = useState<MediaItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
-  const [showKeyboard, setShowKeyboard] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    const stored = window.localStorage.getItem('streamio-watchlist');
-    if (stored) {
-      try {
-        setWatchlist(JSON.parse(stored));
-      } catch {
-        setWatchlist([]);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem('streamio-watchlist', JSON.stringify(watchlist));
-  }, [watchlist]);
-
-  useEffect(() => {
-    setLiveLoading(true);
     fetch(buildApiUrl('/api/live-streams?type=sports'))
       .then((res) => res.json())
       .then((data) => {
-        const next = (data.items || []).map((item: MediaItem & { name?: string }, index: number) => ({
+        const next = (data.items || []).map((item: LiveStreamApiItem, index: number) => ({
           id: item.id || `live-${index + 1}`,
           title: item.title || item.name,
           name: item.name || item.title,
@@ -78,9 +56,9 @@ export default function SportsPage() {
         </div>
       </section>
 
-
-    
-        </div>
-  
+      <section className="mx-auto max-w-[1500px] px-4 pb-8 sm:px-6 lg:px-8">
+        <SportsStreams sources={liveStreams} loading={liveLoading} />
+      </section>
+    </div>
   );
 }

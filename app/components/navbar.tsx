@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 function Icon({ name }: { name: 'grid' | 'play' | 'film' | 'tv' | 'radio' | 'bookmark' }) {
@@ -49,8 +52,25 @@ function Icon({ name }: { name: 'grid' | 'play' | 'film' | 'tv' | 'radio' | 'boo
 }
 
 export default function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const updateScrollState = () => setScrolled(window.scrollY > 8);
+    const initialUpdate = window.requestAnimationFrame(updateScrollState);
+
+    window.addEventListener('scroll', updateScrollState, { passive: true });
+    return () => {
+      window.cancelAnimationFrame(initialUpdate);
+      window.removeEventListener('scroll', updateScrollState);
+    };
+  }, []);
+
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black/85 backdrop-blur-xl">
+    <header
+      className={`fixed inset-x-0 top-0 z-50 border-b backdrop-blur-[12px] transition-colors duration-200 ${
+        scrolled ? 'border-white/10 bg-black/90' : 'border-transparent bg-black/30'
+      }`}
+    >
       <div className="mx-auto flex h-16 max-w-[1500px] items-center gap-6 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex shrink-0 items-center gap-2 text-xl font-black tracking-tight text-white">
           <span>Streamio</span>

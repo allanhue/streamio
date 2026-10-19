@@ -29,9 +29,24 @@ export default function MediaCarousel({
       </div>
 
       {loading ? (
-        <div className="flex gap-3 overflow-hidden">
+        <div
+          className="flex gap-3 overflow-hidden"
+          role="status"
+          aria-busy="true"
+          aria-label={`Loading ${title}`}
+        >
           {Array.from({ length: 8 }, (_, i) => (
-            <div key={i} className="h-56 w-36 shrink-0 animate-pulse rounded-lg bg-white/5 sm:h-64 sm:w-40" />
+            <div
+              key={i}
+              aria-hidden="true"
+              className="w-36 shrink-0 animate-pulse overflow-hidden rounded-lg border border-white/10 bg-black sm:w-40"
+            >
+              <div className="aspect-[2/3] bg-white/5" />
+              <div className="space-y-2 p-2">
+                <div className="h-3 w-4/5 rounded bg-white/10" />
+                <div className="h-2.5 w-2/5 rounded bg-white/5" />
+              </div>
+            </div>
           ))}
         </div>
       ) : items.length === 0 ? (
