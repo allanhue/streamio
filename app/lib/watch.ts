@@ -7,6 +7,8 @@ export type WatchTarget = {
   episode?: number;
 };
 
+let streamWindow: WindowProxy | null = null;
+
 export function isHttpUrl(value: string): boolean {
   try {
     const protocol = new URL(value).protocol;
@@ -14,6 +16,19 @@ export function isHttpUrl(value: string): boolean {
   } catch {
     return false;
   }
+}
+
+export function openStreamWindow(value: string): boolean {
+  if (!isHttpUrl(value)) return false;
+
+  if (!streamWindow || streamWindow.closed) {
+    streamWindow = window.open('about:blank', 'streamio-player');
+    if (!streamWindow) return false;
+    streamWindow.opener = null;
+  }
+
+  streamWindow.location.replace(value);
+  return true;
 }
 
 export function buildWatchHref(target: WatchTarget): string {

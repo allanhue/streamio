@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Player from '../components/player';
+import OpenStreamButton from '../components/open_stream_button';
 import { isHttpUrl } from '../lib/watch';
 import CategorySection from './category_section';
 import HeroBanner from './hero-banner';
@@ -411,15 +412,13 @@ export default function DashboardUI() {
                     <p className="text-center text-sm text-neutral-300">
                       Open the stream in a separate window to play it.
                     </p>
-                    <a
-                      href={currentSource}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <OpenStreamButton
+                      src={currentSource}
                       className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200"
                     >
                       <Icon name="play" />
                       Play in new window
-                    </a>
+                    </OpenStreamButton>
                   </div>
                 ) : (
                   <div className="grid h-full place-items-center p-6 text-sm text-neutral-400">

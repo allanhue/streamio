@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import Player from '../components/player';
+import OpenStreamButton from '../components/open_stream_button';
 import { isHttpUrl } from '../lib/watch';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
@@ -110,14 +111,12 @@ function WatchClient() {
               <p className="max-w-md text-center text-sm text-neutral-300">
                 Open the stream in a separate window to start playback.
               </p>
-              <a
-                href={currentSource}
-                target="_blank"
-                rel="noopener noreferrer"
+              <OpenStreamButton
+                src={currentSource}
                 className="rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200"
               >
                 Open stream in new window
-              </a>
+              </OpenStreamButton>
             </div>
           ) : (
             <div className="grid aspect-video place-items-center text-sm text-neutral-400">No playable source found</div>

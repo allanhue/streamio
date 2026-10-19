@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Player from '../components/player';
+import OpenStreamButton from '../components/open_stream_button';
 import { isHttpUrl } from '../lib/watch';
 import CategorySection from '../ui/category_section';
 import SearchPanel from '../ui/search_panel';
@@ -248,14 +249,12 @@ export default function SeriesPage() {
                     <p className="max-w-md text-center text-sm text-neutral-300">
                       Open this stream in a separate window to play it.
                     </p>
-                    <a
-                      href={currentSource}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <OpenStreamButton
+                      src={currentSource}
                       className="rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200"
                     >
                       Play in new window
-                    </a>
+                    </OpenStreamButton>
                   </div>
                 ) : (
                   <div className="grid h-full place-items-center p-6 text-sm text-neutral-400">
