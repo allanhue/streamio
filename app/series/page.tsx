@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Player from '../components/player';
-import SecureStreamEmbed from '../components/secure_stream_embed';
+import { isHttpUrl } from '../lib/watch';
 import CategorySection from '../ui/category_section';
 import SearchPanel from '../ui/search_panel';
 import Watchlist, { WatchlistItem } from '../ui/watchlist';
@@ -52,8 +52,6 @@ export default function SeriesPage() {
   const [episode, setEpisode] = useState(1);
   const [seriesMeta, setSeriesMeta] = useState(defaultSeriesMeta);
   const [loadingEpisode, setLoadingEpisode] = useState(false);
-  const [inlinePlayer, setInlinePlayer] = useState(false);
-  const [playerLocked, setPlayerLocked] = useState(true);
 
   useEffect(() => {
     const stored = window.localStorage.getItem('streamio-watchlist');
@@ -153,8 +151,6 @@ export default function SeriesPage() {
     setSeason(nextSeason);
     setEpisode(nextEpisode);
     setLoadingEpisode(true);
-    setInlinePlayer(false);
-    setPlayerLocked(true);
 
     try {
       await loadSeriesMeta(item);
@@ -244,34 +240,26 @@ export default function SeriesPage() {
               </div>
 
               <div className="relative aspect-video w-full overflow-hidden bg-black">
-                {isDirectHls && currentSource ? (
+                {isDirectHls && currentSource && isHttpUrl(currentSource) ? (
                   <Player src={currentSource} />
-                ) : inlinePlayer && currentSource ? (
-                  <SecureStreamEmbed
-                    src={currentSource}
-                    title={selectedItem.title}
-                    className={`h-full w-full border-0 ${playerLocked ? 'pointer-events-none' : 'pointer-events-auto'}`}
-                  />
+                ) : currentSource && isHttpUrl(currentSource) ? (
+                  <div className="flex h-full flex-col items-center justify-center gap-4 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_45%)] p-6">
+                    <h3 className="text-xl font-black">Ready to play</h3>
+                    <p className="max-w-md text-center text-sm text-neutral-300">
+                      Open this stream in a separate window to play it.
+                    </p>
+                    <a
+                      href={currentSource}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200"
+                    >
+                      Play in new window
+                    </a>
+                  </div>
                 ) : (
-                  <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_45%)] p-6">
-                    <div className="w-full max-w-xl rounded-[28px] border border-white/10 bg-black/55 p-5 text-center backdrop-blur-sm">
-                      <h3 className="text-xl font-black">Ready to play</h3>
-                      <p className="mt-2 text-sm text-neutral-300">
-                        Load an episode from the series picker and play it here. Popups and outside navigation are blocked.
-                      </p>
-                      <div className="mt-5 flex flex-wrap justify-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setInlinePlayer(true);
-                            setPlayerLocked(false);
-                          }}
-                          className="rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200"
-                        >
-                          Play in protected player
-                        </button>
-                      </div>
-                    </div>
+                  <div className="grid h-full place-items-center p-6 text-sm text-neutral-400">
+                    No playable stream found.
                   </div>
                 )}
               </div>
@@ -359,8 +347,6 @@ export default function SeriesPage() {
                       type="button"
                       onClick={() => {
                         setActiveMirror(idx);
-                        setInlinePlayer(false);
-                        setPlayerLocked(true);
                       }}
                       className={`min-w-0 truncate rounded-xl px-3 py-3 text-left text-sm font-bold transition ${
                         activeMirror === idx

@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import Player from '../components/player';
+import { isHttpUrl } from '../lib/watch';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 const buildApiUrl = (path: string) => `${API_BASE.replace(/\/$/, '')}${path}`;
@@ -102,18 +103,20 @@ function WatchClient() {
             <div className="grid aspect-video place-items-center text-sm text-neutral-400">Loading stream...</div>
           ) : error ? (
             <div className="grid aspect-video place-items-center text-sm text-red-300">{error}</div>
-          ) : isDirectHls && currentSource ? (
+          ) : isDirectHls && currentSource && isHttpUrl(currentSource) ? (
             <Player src={currentSource} />
-          ) : currentSource ? (
+          ) : currentSource && isHttpUrl(currentSource) ? (
             <div className="flex aspect-video flex-col items-center justify-center gap-4 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.1),_transparent_45%)] p-6">
               <p className="max-w-md text-center text-sm text-neutral-300">
-                Open the stream in this new tab to start playback.
+                Open the stream in a separate window to start playback.
               </p>
               <a
                 href={currentSource}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200"
               >
-                Open stream
+                Open stream in new window
               </a>
             </div>
           ) : (
@@ -129,7 +132,6 @@ function WatchClient() {
                 type="button"
                 onClick={() => {
                   setActiveMirror(index);
-                  setInlinePlayer(false);
                 }}
                 className={`rounded-full border px-3 py-1.5 text-xs font-black transition ${
                   index === activeMirror

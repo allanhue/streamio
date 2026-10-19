@@ -69,8 +69,6 @@ export default function MediaCarousel({
                     media_type: item.media_type || 'movie',
                     url: item.url,
                   })}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="netflix-card group relative block w-36 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-black sm:w-40"
                 >
                   <div className="relative aspect-[2/3] bg-neutral-900">

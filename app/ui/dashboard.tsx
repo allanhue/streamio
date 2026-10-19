@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Player from '../components/player';
-import SecureStreamEmbed from '../components/secure_stream_embed';
+import { isHttpUrl } from '../lib/watch';
 import CategorySection from './category_section';
 import HeroBanner from './hero-banner';
 import LatestList from './latest_list';
@@ -122,8 +122,6 @@ export default function DashboardUI() {
   const [episode, setEpisode] = useState(1);
   const [loading, setLoading] = useState(true);
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
-  const [playerLocked, setPlayerLocked] = useState(true);
-  const [inlinePlayer, setInlinePlayer] = useState(false);
   const [seriesMeta, setSeriesMeta] = useState(defaultSeriesMeta);
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [loadingEpisode, setLoadingEpisode] = useState(false);
@@ -195,8 +193,6 @@ export default function DashboardUI() {
       const res = await fetch(buildApiUrl(`/api/stream?id=${item.id}&type=${type}&season=${nextSeason}&episode=${nextEpisode}${urlParam}`));
       const data = await res.json();
       setSelectedStream(data);
-      setPlayerLocked(true);
-      setInlinePlayer(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       console.error(err);
@@ -210,8 +206,6 @@ export default function DashboardUI() {
     setSearchQuery('');
     setSelectedItem(null);
     setSelectedStream(null);
-    setPlayerLocked(true);
-    setInlinePlayer(false);
     setSeriesMeta(defaultSeriesMeta);
     setSeason(1);
     setEpisode(1);
@@ -273,17 +267,6 @@ export default function DashboardUI() {
         return;
       }
 
-      if (event.code === 'Space' && selectedItem && !selectedStream?.isLive) {
-        event.preventDefault();
-        setPlayerLocked((current) => !current);
-      }
-
-      if (event.code === 'Enter' && currentSource && !selectedStream?.isLive) {
-        event.preventDefault();
-        setInlinePlayer(true);
-        setPlayerLocked(false);
-      }
-
       if ((event.code === 'ArrowLeft' || event.code === 'ArrowRight') && activeSources.length > 1) {
         event.preventDefault();
         const nextIndex = event.code === 'ArrowRight'
@@ -295,7 +278,7 @@ export default function DashboardUI() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedItem, selectedStream, activeSources, activeMirror, currentSource, playerLocked]);
+  }, [activeSources, activeMirror]);
 
   const nextEpisodePosition = useMemo(() => {
     if (episode < currentSeasonEpisodeCount) {
@@ -418,154 +401,30 @@ export default function DashboardUI() {
               </div>
 
               <div className="relative aspect-video w-full overflow-hidden bg-black">
-                {isDirectHls && currentSource ? (
+                {isDirectHls && currentSource && isHttpUrl(currentSource) ? (
                   <Player src={currentSource} />
-                ) : selectedStream.isLive && activeSources[0] ? (
-                  inlinePlayer ? (
-                    <SecureStreamEmbed
-                      src={activeSources[0].url}
-                      title={selectedItem.title}
-                      className="h-full w-full border-0"
-                    />
-                  ) : (
-                    <div className="flex h-full flex-col items-center justify-center gap-4">
-                      <span className="grid h-14 w-14 place-items-center rounded-full bg-white text-black">
-                        <Icon name="radio" className="h-6 w-6" />
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setInlinePlayer(true)}
-                        className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200"
-                      >
-                        <Icon name="play" />
-                        Play live stream here
-                      </button>
-                    </div>
-                  )
+                ) : currentSource && isHttpUrl(currentSource) ? (
+                  <div className="flex h-full flex-col items-center justify-center gap-4 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_45%),_linear-gradient(180deg,_#0b0b0b,_#030303)] p-6">
+                    <span className="grid h-14 w-14 place-items-center rounded-full bg-white text-black">
+                      <Icon name={selectedStream.isLive ? 'radio' : 'play'} className="h-6 w-6" />
+                    </span>
+                    <p className="text-center text-sm text-neutral-300">
+                      Open the stream in a separate window to play it.
+                    </p>
+                    <a
+                      href={currentSource}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200"
+                    >
+                      <Icon name="play" />
+                      Play in new window
+                    </a>
+                  </div>
                 ) : (
-                  <>
-                    {inlinePlayer && currentSource ? (
-                      <>
-                        <SecureStreamEmbed
-                          src={currentSource}
-                          title={selectedItem.title}
-                          className={`h-full w-full border-0 ${playerLocked ? 'pointer-events-none' : 'pointer-events-auto'}`}
-                        />
-
-                        <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-between p-3 opacity-0 transition duration-200 hover:opacity-100 group-hover:opacity-100">
-                          <div className="flex justify-end">
-                            <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/10 bg-black/55 px-2 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-200 backdrop-blur-sm">
-                              <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                              Live protected
-                            </div>
-                          </div>
-
-                          <div className="pointer-events-auto rounded-2xl border border-white/10 bg-black/55 p-3 backdrop-blur-sm">
-                            <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-white/10">
-                              <div className="h-full w-1/3 rounded-full bg-white" />
-                            </div>
-                            <div className="flex items-center justify-between gap-3 text-white">
-                              <div className="flex items-center gap-2">
-                                <button type="button" className="grid h-9 w-9 place-items-center rounded-full bg-white text-black transition hover:bg-neutral-200">
-                                  <Icon name="play" className="h-4 w-4" />
-                                </button>
-                                <button type="button" className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/15">
-                                  <span className="text-sm font-black">10s</span>
-                                </button>
-                                <button type="button" className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/15">
-                                  <span className="text-sm font-black">+10s</span>
-                                </button>
-                              </div>
-
-                              <div className="flex items-center gap-2">
-                                <button type="button" className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/15">
-                                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-current">
-                                    <path d="M3 9v6h4l5 5V4L7 9H3Zm13.5 3a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 16.5 12ZM18 3.5v2.06a7 7 0 0 1 0 12.88v2.06A9 9 0 0 0 18 3.5Z"/>
-                                  </svg>
-                                </button>
-                                <button type="button" className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/15">
-                                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-current">
-                                    <path d="M7 14v-4h3L12 7v10l-2-3H7Zm9-8h2v12h-2V6Zm-4 1.5V16.5L9.5 14H7v-4h2.5L12 7.5Z"/>
-                                  </svg>
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div
-                          className={`absolute inset-0 z-20 flex items-end justify-center bg-black/55 backdrop-blur-[1px] transition-opacity duration-200 ${playerLocked ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'}`}
-                          onMouseDown={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                          }}
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            setPlayerLocked(false);
-                          }}
-                        >
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.preventDefault();
-                              event.stopPropagation();
-                              setPlayerLocked(false);
-                            }}
-                            className="mb-4 cursor-pointer rounded-full border border-white/20 bg-white px-4 py-2 text-sm font-black text-black shadow-lg shadow-black/40 transition hover:bg-neutral-200"
-                          >
-                            Unlock player
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_45%),_linear-gradient(180deg,_#0b0b0b,_#030303)] p-6">
-                        <div className="w-full max-w-xl rounded-[28px] border border-white/10 bg-black/55 p-5 shadow-2xl shadow-black/50 backdrop-blur-sm">
-                          <div className="mb-4 flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-3">
-                              <span className="grid h-11 w-11 place-items-center rounded-full bg-white text-black">
-                                <Icon name="play" className="h-5 w-5" />
-                              </span>
-                              <div>
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-yellow-300">Safe playback</p>
-                                <h3 className="text-xl font-black">Protected stream view</h3>
-                              </div>
-                            </div>
-                            <span className="rounded-full border border-yellow-400/40 bg-yellow-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-yellow-200">Secure</span>
-                          </div>
-
-                          <div className="mb-5 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-left">
-                            <p className="text-sm leading-6 text-neutral-300">
-                              The player is sandboxed to block popups and navigation away from Streamio. Playback stays in this window.
-                            </p>
-                          </div>
-
-                          <div className="mb-5 space-y-3">
-                            <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2">
-                              <span className="text-xs font-bold uppercase tracking-[0.18em] text-neutral-500">Playback mode</span>
-                              <span className="text-sm font-black text-white">Protected</span>
-                            </div>
-                            <div className="h-2 overflow-hidden rounded-full bg-white/10">
-                              <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-white via-neutral-200 to-neutral-400" />
-                            </div>
-                          </div>
-
-                          <div className="flex flex-wrap items-center justify-center gap-3">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setInlinePlayer(true);
-                                setPlayerLocked(false);
-                              }}
-                              className="rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-200"
-                            >
-                              Play in protected player
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </>
+                  <div className="grid h-full place-items-center p-6 text-sm text-neutral-400">
+                    No playable stream found.
+                  </div>
                 )}
               </div>
             </div>

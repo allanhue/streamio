@@ -7,6 +7,15 @@ export type WatchTarget = {
   episode?: number;
 };
 
+export function isHttpUrl(value: string): boolean {
+  try {
+    const protocol = new URL(value).protocol;
+    return protocol === 'http:' || protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 export function buildWatchHref(target: WatchTarget): string {
   const params = new URLSearchParams({
     id: String(target.id),
