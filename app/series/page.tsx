@@ -291,7 +291,6 @@ export default function SeriesPage() {
 
                 <div className="mb-2 mt-4 flex items-center justify-between">
                   <p className="text-xs font-bold uppercase tracking-[0.16em] text-neutral-500">Episodes</p>
-                  <span className="text-xs font-bold text-neutral-500">Choose, then load</span>
                 </div>
 
                 <div className="grid max-h-64 gap-2 overflow-y-auto pr-1">
